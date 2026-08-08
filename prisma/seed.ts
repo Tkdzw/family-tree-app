@@ -1,237 +1,114 @@
-// Seeds the database with exactly what's in
-// "01_Chiwashira_Ziwenga_Family_Tree_Version_00.25.xlsx" today —
-// the "Nyikadzino's 1st & 2nd Gen" sheet, "Grand Sons and Daughters" section.
+// Seeds the database from prisma/data/source-tree.json — a cleaned,
+// id-based export of the family tree (ancestor lineage, 7 wives, 21
+// children, 85 grandchildren), one record per person with explicit
+// parentIds / spouseIds.
 //
 // Run with: npx prisma db seed
-//
-// This is intentionally a faithful copy of the current spreadsheet, gaps included
-// (Hosea Ziwenga and Peter Ziwenga have no children recorded — that's a data gap,
-// not a fact). Re-run this after every spreadsheet update, or replace it with a
-// real Excel parser once the workbook stabilizes.
 
 import { PrismaClient } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 
 const prisma = new PrismaClient();
 
-type ChildRecord = { name: string; deceased: boolean };
-type BranchRecord = { name: string; children: ChildRecord[] };
+type SourcePerson = {
+  id: string;
+  name: string;
+  gender: string;
+  parentIds: string[];
+  spouseIds: string[];
+  aka: string;
+  years: string;
+  status: string;
+  notes: string;
+  sourceRef: string;
+  branch: string;
+};
 
-const BRANCHES: BranchRecord[] = [
-  { name: "Ben Man'arayi Ziwenga", children: [
-    { name: "Mununuri Godfery", deceased: false },
-    { name: "Tichadii Jericho", deceased: false },
-    { name: "Naboth", deceased: false },
-    { name: "Big D", deceased: true },
-    { name: "Thamary", deceased: false },
-    { name: "Audia", deceased: false },
-    { name: "Elizabeth Rumbidzai", deceased: false },
-    { name: "Farai", deceased: false },
-    { name: "Morden", deceased: false },
-  ]},
-  { name: "Cephas Tafanana Ziwenga", children: [
-    { name: "Tsitsi", deceased: false },
-    { name: "Blissing Ben", deceased: true },
-    { name: "Pardon", deceased: true },
-    { name: "Rosemary", deceased: false },
-    { name: "Vimbai Bertha", deceased: false },
-    { name: "Dherina", deceased: false },
-  ]},
-  { name: "Cathian Takavengwa Ziwenga", children: [
-    { name: "Jabulani Hamadziripi", deceased: false },
-    { name: "Deliah Sitsheliwe", deceased: false },
-    { name: "Hardon", deceased: false },
-    { name: "Wellington", deceased: false },
-    { name: "Ophillia", deceased: false },
-    { name: "Zivanai", deceased: false },
-    { name: "Onai", deceased: false },
-  ]},
-  { name: "Naison Hatidani Chiwashira", children: [
-    { name: "Masimba Morgan", deceased: true },
-    { name: "Tafanana", deceased: false },
-    { name: "Tawanda Andrew", deceased: false },
-    { name: "Tendai Shephard", deceased: false },
-    { name: "Tafadzwa Robert", deceased: false },
-    { name: "Taziva Donald", deceased: false },
-  ]},
-  { name: "Jameson Chiwashira", children: [
-    { name: "Batsirai Memory", deceased: false },
-    { name: "Verengayi Vivian", deceased: false },
-    { name: "Tongai Common Well", deceased: false },
-    { name: "Edwin Pupurayi", deceased: false },
-    { name: "Taudzwei Nodgar", deceased: false },
-    { name: "Nellie Nyararai", deceased: false },
-    { name: "Rungano Mhan'arai", deceased: false },
-  ]},
-  { name: "Walter Ziwenga", children: [
-    { name: "Tichaona", deceased: true },
-    { name: "Wonder", deceased: true },
-    { name: "Paradzai", deceased: true },
-    { name: "Orsbon", deceased: true },
-    { name: "Tarisai", deceased: false },
-    { name: "Elizabeth Rufaro", deceased: false },
-  ]},
-  { name: "Margret Ziwenga", children: [
-    { name: "Norwell", deceased: false },
-    { name: "David", deceased: false },
-    { name: "Noreen", deceased: false },
-    { name: "Margret", deceased: false },
-    { name: "Marjorie", deceased: true },
-    { name: "Sharon", deceased: false },
-    { name: "Graduate", deceased: false },
-    { name: "Mercy", deceased: false },
-  ]},
-  { name: "Gilbert Shopa Chiwashira", children: [
-    { name: "Erasmus", deceased: true },
-    { name: "Emily Tariro", deceased: false },
-    { name: "Edith", deceased: false },
-  ]},
-  { name: "Ephraim Chiwashira", children: [
-    { name: "Cliff Farai", deceased: false },
-    { name: "Oscar Tinashe", deceased: false },
-    { name: "Otillia", deceased: false },
-    { name: "Sally", deceased: false },
-    { name: "Prosper", deceased: false },
-  ]},
-  { name: "Levy Tongonzani Ziwenga", children: [
-    { name: "John", deceased: false },
-    { name: "Renia", deceased: false },
-  ]},
-  { name: "Dherina Chiwashira", children: [
-    { name: "Fungisai", deceased: false },
-    { name: "Sithokozile", deceased: false },
-    { name: "Zvisinei", deceased: false },
-  ]},
-  { name: "James T Chiwashira", children: [
-    { name: "Maxwell", deceased: false },
-  ]},
-  { name: "Ignatious Chiwashira", children: [
-    { name: "Getrude", deceased: true },
-    { name: "Jameson Ticharwa", deceased: false },
-    { name: "Brian Nyikadzino", deceased: false },
-    { name: "Brighton", deceased: false },
-    { name: "Precious Pepukai", deceased: false },
-    { name: "Pride", deceased: false },
-    { name: "Terence", deceased: false },
-  ]},
-  { name: "Josephine Chiwashira", children: [
-    { name: "Jason", deceased: false },
-    { name: "Nelia", deceased: false },
-    { name: "Josphat Cornelius", deceased: false },
-    { name: "Tafadzwa", deceased: false },
-    { name: "Redemptor Tatenda", deceased: false },
-    { name: "Vimbai", deceased: true },
-    { name: "Kudakwashe", deceased: false },
-  ]},
-  { name: "Casper Chiwashira", children: [
-    { name: "Francis", deceased: false },
-    { name: "Florence", deceased: false },
-    { name: "Fortunate", deceased: false },
-    { name: "Faith", deceased: true },
-    { name: "Felistas", deceased: false },
-    { name: "Future", deceased: false },
-    { name: "Felicity Paidashe", deceased: false },
-  ]},
-  { name: "Nkosana Nyikadzino Norman Ziwenga", children: [
-    { name: "Ronald Zvikomborero", deceased: true },
-    { name: "Gertrude Kudzai", deceased: false },
-    { name: "Redempta Gamuchirai", deceased: false },
-    { name: "Fortunate", deceased: true },
-    { name: "Tonderai Lloyd", deceased: false },
-    { name: "Jubilee", deceased: false },
-  ]},
-  { name: "Manasa Chiwashira", children: [
-    { name: "Clifford", deceased: false },
-    { name: "Edwin", deceased: false },
-    { name: "Martha", deceased: false },
-    { name: "Natasha", deceased: true },
-    { name: "Takudzwa", deceased: true },
-  ]},
-  { name: "Sabastain Ziwenga", children: [
-    { name: "Rosemary", deceased: false },
-    { name: "Melinda", deceased: false },
-    { name: "Mellissa", deceased: false },
-  ]},
-  { name: "Rosemary Ziwenga", children: [
-    { name: "Tonderai Sebastain", deceased: false },
-    { name: "Privilege", deceased: false },
-    { name: "Tapiwa Malcom", deceased: false },
-    { name: "Tendai Princess", deceased: false },
-    { name: "Nyasha Pearl", deceased: false },
-  ]},
-  { name: "Hosea Ziwenga", children: [] },
-  { name: "Peter Ziwenga", children: [] },
-];
+const raw = fs.readFileSync(path.join(__dirname, "data", "source-tree.json"), "utf-8");
+const SOURCE: Record<string, SourcePerson> = JSON.parse(raw);
 
-// splits "Ben Man'arayi Ziwenga" -> firstName "Ben Man'arayi", surname "Ziwenga"
-// (last whitespace-separated token treated as surname; good enough for this dataset,
-// review manually for compound names like "James T Chiwashira" if it matters to you)
-function splitName(fullName: string): { firstName: string; surname: string | null } {
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return { firstName: parts[0], surname: null };
-  const surname = parts[parts.length - 1];
-  const firstName = parts.slice(0, -1).join(" ");
-  return { firstName, surname };
+/**
+ * PLACEHOLDER wife grouping — none of the 21 children have a mother recorded
+ * in the source file (every one says "please assign if known"). Until the
+ * real assignments are confirmed with family elders, this block-distributes
+ * them evenly across the 7 wives (3 children each, in c1..c21 order) purely
+ * so the tree can be browsed grouped by wife.
+ *
+ * THIS IS NOT VERIFIED DATA. To correct it: edit this map with the real
+ * child -> wife assignments, then re-run `npm run db:seed`. Nothing else
+ * needs to change — placeholderMotherId is stored separately from the real
+ * ParentChild table, so fixing this never touches verified relationships.
+ */
+function buildPlaceholderWifeMap(): Record<string, string> {
+  const childIds = Array.from({ length: 21 }, (_, i) => `c${i + 1}`);
+  const wifeIds = Array.from({ length: 7 }, (_, i) => `w${i + 1}`);
+  const map: Record<string, string> = {};
+  childIds.forEach((childId, i) => {
+    const wifeIndex = Math.floor(i / 3); // 3 children per wife, in order
+    map[childId] = wifeIds[wifeIndex];
+  });
+  return map;
 }
 
+const PLACEHOLDER_WIFE_MAP = buildPlaceholderWifeMap();
+
 async function main() {
-  console.log("Seeding: clearing existing data...");
+  console.log(`Loaded ${Object.keys(SOURCE).length} people from source-tree.json`);
+
+  console.log("Clearing existing data...");
   await prisma.parentChild.deleteMany();
   await prisma.union.deleteMany();
+  await prisma.person.updateMany({ data: { placeholderMotherId: null } }).catch(() => {});
   await prisma.person.deleteMany();
 
-  console.log("Creating root ancestor...");
-  const root = await prisma.person.create({
-    data: {
-      firstName: "Nyikadzino Kenias",
-      surname: "Bhurenge",
-      otherNames: "Tsvimbombiri",
-      gender: "M",
-      totem: "Mhofu",
-      sourceNote: "Family cover page / Scope document",
-    },
-  });
-
-  let branchCount = 0;
-  let childCount = 0;
-
-  for (const branch of BRANCHES) {
-    const { firstName, surname } = splitName(branch.name);
-    const branchPerson = await prisma.person.create({
+  console.log("Creating people...");
+  for (const p of Object.values(SOURCE)) {
+    await prisma.person.create({
       data: {
-        firstName,
-        surname,
-        gender: null, // not recorded in the sheet — fill in during Phase 0 data entry
-        totem: "Mhofu",
-        sourceNote: "Nyikadzino's 1st & 2nd Gen sheet — branch head",
+        id: p.id, // reuse the source file's ids directly — they're already stable and readable
+        firstName: p.name,
+        otherNames: p.aka || null,
+        gender: p.gender || null,
+        notes: p.notes || null,
+        sourceNote: p.sourceRef || null,
+        branch: p.branch || null,
+        placeholderMotherId: PLACEHOLDER_WIFE_MAP[p.id] ?? null,
       },
     });
-    branchCount++;
+  }
 
-    await prisma.parentChild.create({
-      data: { parentId: root.id, childId: branchPerson.id, relType: "biological" },
-    });
-
-    for (const child of branch.children) {
-      const nameParts = splitName(child.name);
-      const childPerson = await prisma.person.create({
-        data: {
-          firstName: nameParts.firstName,
-          surname: nameParts.surname ?? surname, // inherit branch surname if child had none of their own
-          deceased: child.deceased,
-          sourceNote: "Nyikadzino's 1st & 2nd Gen sheet — Grand Sons and Daughters",
-        },
-      });
-      childCount++;
-
+  console.log("Creating parent/child links...");
+  let linkCount = 0;
+  for (const p of Object.values(SOURCE)) {
+    for (const parentId of p.parentIds) {
+      if (!SOURCE[parentId]) continue; // guard against dangling refs
       await prisma.parentChild.create({
-        data: { parentId: branchPerson.id, childId: childPerson.id, relType: "biological" },
+        data: { parentId, childId: p.id, relType: "biological" },
       });
+      linkCount++;
     }
   }
 
-  console.log(`Done. Created 1 root, ${branchCount} branches, ${childCount} grandchildren.`);
-  console.log("Reminder: Hosea Ziwenga and Peter Ziwenga were seeded with zero children —");
-  console.log("that's the current data gap, not a fact. Fill in via Phase 0 data entry.");
+  console.log("Creating unions (spouse pairs)...");
+  const seenPairs = new Set<string>();
+  let unionCount = 0;
+  for (const p of Object.values(SOURCE)) {
+    for (const spouseId of p.spouseIds) {
+      if (!SOURCE[spouseId]) continue;
+      const pairKey = [p.id, spouseId].sort().join("|");
+      if (seenPairs.has(pairKey)) continue;
+      seenPairs.add(pairKey);
+      await prisma.union.create({
+        data: { partnerAId: p.id, partnerBId: spouseId, type: "unknown" },
+      });
+      unionCount++;
+    }
+  }
+
+  console.log(`Done. ${Object.keys(SOURCE).length} people, ${linkCount} parent/child links, ${unionCount} unions.`);
+  console.log("Reminder: wife groupings (placeholderMotherId) are an UNVERIFIED placeholder —");
+  console.log("see the comment above PLACEHOLDER_WIFE_MAP in this file to correct them.");
 }
 
 main()

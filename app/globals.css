@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background:
+    radial-gradient(ellipse at 20% -10%, rgba(201, 162, 74, 0.1), transparent 45%),
+    radial-gradient(ellipse at 90% 10%, rgba(176, 86, 47, 0.08), transparent 40%),
+    #181f19;
+}
+
+.child-row-dashed {
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+.child-row-dashed:last-child {
+  border-bottom: none;
+}

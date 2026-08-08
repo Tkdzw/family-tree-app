@@ -1,0 +1,1800 @@
+{
+  "p1": {
+    "id": "p1",
+    "name": "Mbiru",
+    "gender": "",
+    "parentIds": [],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Root of the ancestral line as recorded in the original family tree file. Order and relationships in this line are unverified oral tradition — please confirm with elders.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p2": {
+    "id": "p2",
+    "name": "Chingwere Chimhari",
+    "gender": "",
+    "parentIds": [
+      "p1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p3": {
+    "id": "p3",
+    "name": "Masarirambi",
+    "gender": "",
+    "parentIds": [
+      "p2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p4": {
+    "id": "p4",
+    "name": "Chiwashira",
+    "gender": "",
+    "parentIds": [
+      "p3"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Branch-founding ancestor of the Chiwashira surname.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p5": {
+    "id": "p5",
+    "name": "Muchecheterwa",
+    "gender": "",
+    "parentIds": [
+      "p4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p6": {
+    "id": "p6",
+    "name": "Ziwenga",
+    "gender": "",
+    "parentIds": [
+      "p5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Branch-founding ancestor of the Ziwenga surname.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "p7": {
+    "id": "p7",
+    "name": "Nyikadzino Burenge",
+    "gender": "M",
+    "parentIds": [
+      "p6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Father of the current generation's fathers, per the family tree's own Scope notes. Had (at least) 7 wives.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w1": {
+    "id": "w1",
+    "name": "Wife I",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w2": {
+    "id": "w2",
+    "name": "Wife II",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w3": {
+    "id": "w3",
+    "name": "Wife III",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w4": {
+    "id": "w4",
+    "name": "Wife IV",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w5": {
+    "id": "w5",
+    "name": "Wife V",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w6": {
+    "id": "w6",
+    "name": "Wife VI",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "w7": {
+    "id": "w7",
+    "name": "Wife VII",
+    "gender": "F",
+    "parentIds": [],
+    "spouseIds": [
+      "p7"
+    ],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Name not recorded in the original file — please fill in if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c1": {
+    "id": "c1",
+    "name": "Ben Mhan'arayi",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c2": {
+    "id": "c2",
+    "name": "Cephas Tafanana",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c3": {
+    "id": "c3",
+    "name": "Cathian Takavengwa",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c4": {
+    "id": "c4",
+    "name": "Naison Hatidani",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Chiwashira"
+  },
+  "c5": {
+    "id": "c5",
+    "name": "Jameson",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c6": {
+    "id": "c6",
+    "name": "Walter",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c7": {
+    "id": "c7",
+    "name": "Margret",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c8": {
+    "id": "c8",
+    "name": "Gilbert Shopa",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Chiwashira"
+  },
+  "c9": {
+    "id": "c9",
+    "name": "Ephraim",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Chiwashira"
+  },
+  "c10": {
+    "id": "c10",
+    "name": "Levy Tongonzani",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c11": {
+    "id": "c11",
+    "name": "Dherina",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c12": {
+    "id": "c12",
+    "name": "James T",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Chiwashira"
+  },
+  "c13": {
+    "id": "c13",
+    "name": "Ignatious",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c14": {
+    "id": "c14",
+    "name": "Josephine",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c15": {
+    "id": "c15",
+    "name": "Casper",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c16": {
+    "id": "c16",
+    "name": "Nkosana Nyikadzino Norman",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c17": {
+    "id": "c17",
+    "name": "Manasa",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c18": {
+    "id": "c18",
+    "name": "Sebastain",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": "Ziwenga"
+  },
+  "c19": {
+    "id": "c19",
+    "name": "Rosemary",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c20": {
+    "id": "c20",
+    "name": "Hosea",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "c21": {
+    "id": "c21",
+    "name": "Peter",
+    "gender": "",
+    "parentIds": [
+      "p7"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Mother (which of the 7 wives) not recorded in the original file — please assign if known.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g1": {
+    "id": "g1",
+    "name": "Mununuri",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g2": {
+    "id": "g2",
+    "name": "Godfrey",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g3": {
+    "id": "g3",
+    "name": "Tichadii Jericho",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g4": {
+    "id": "g4",
+    "name": "Naboth",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g5": {
+    "id": "g5",
+    "name": "Thamary",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g6": {
+    "id": "g6",
+    "name": "Audia",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g7": {
+    "id": "g7",
+    "name": "Elizabeth Rumbidzai",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g8": {
+    "id": "g8",
+    "name": "Farai",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g9": {
+    "id": "g9",
+    "name": "Mordern",
+    "gender": "",
+    "parentIds": [
+      "c1"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g10": {
+    "id": "g10",
+    "name": "Tsitsi",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g11": {
+    "id": "g11",
+    "name": "Blessing Ben",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g12": {
+    "id": "g12",
+    "name": "Pardon",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g13": {
+    "id": "g13",
+    "name": "Rosemary",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g14": {
+    "id": "g14",
+    "name": "Vimbai Bertha",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g15": {
+    "id": "g15",
+    "name": "Dherina",
+    "gender": "",
+    "parentIds": [
+      "c2"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g16": {
+    "id": "g16",
+    "name": "Masimba Morgan",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g17": {
+    "id": "g17",
+    "name": "Tafanana",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g18": {
+    "id": "g18",
+    "name": "Tawanda Andrew",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g19": {
+    "id": "g19",
+    "name": "Tendai Shephard",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g20": {
+    "id": "g20",
+    "name": "Tafadzwa Robert",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g21": {
+    "id": "g21",
+    "name": "Taziva Donald",
+    "gender": "",
+    "parentIds": [
+      "c4"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g22": {
+    "id": "g22",
+    "name": "Batsirayi Memory",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g23": {
+    "id": "g23",
+    "name": "Verengayi Vivian",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g24": {
+    "id": "g24",
+    "name": "Tongai Common Well",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g25": {
+    "id": "g25",
+    "name": "Edwin Pupurayi",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g26": {
+    "id": "g26",
+    "name": "Taudzwei Nodgar",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g27": {
+    "id": "g27",
+    "name": "Nelly Nyararai",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g28": {
+    "id": "g28",
+    "name": "Rungano Mhan'arai",
+    "gender": "",
+    "parentIds": [
+      "c5"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g29": {
+    "id": "g29",
+    "name": "Tichaona",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g30": {
+    "id": "g30",
+    "name": "Wonder",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g31": {
+    "id": "g31",
+    "name": "Paradzai",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g32": {
+    "id": "g32",
+    "name": "Osborn",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g33": {
+    "id": "g33",
+    "name": "Tarisai",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g34": {
+    "id": "g34",
+    "name": "Elizabeth Rufaro",
+    "gender": "",
+    "parentIds": [
+      "c6"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g35": {
+    "id": "g35",
+    "name": "David",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g36": {
+    "id": "g36",
+    "name": "Noreen",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g37": {
+    "id": "g37",
+    "name": "Margret",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g38": {
+    "id": "g38",
+    "name": "Marjorie (late)",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g39": {
+    "id": "g39",
+    "name": "Erasmus",
+    "gender": "",
+    "parentIds": [
+      "c9"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g40": {
+    "id": "g40",
+    "name": "Emily Tariro",
+    "gender": "",
+    "parentIds": [
+      "c9"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g41": {
+    "id": "g41",
+    "name": "Edith",
+    "gender": "",
+    "parentIds": [
+      "c9"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g42": {
+    "id": "g42",
+    "name": "Cliff Farai",
+    "gender": "",
+    "parentIds": [
+      "c10"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g43": {
+    "id": "g43",
+    "name": "Oscar Tinashe",
+    "gender": "",
+    "parentIds": [
+      "c10"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g44": {
+    "id": "g44",
+    "name": "Otillia",
+    "gender": "",
+    "parentIds": [
+      "c10"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g45": {
+    "id": "g45",
+    "name": "Sally",
+    "gender": "",
+    "parentIds": [
+      "c10"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g46": {
+    "id": "g46",
+    "name": "Prosper",
+    "gender": "",
+    "parentIds": [
+      "c10"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g47": {
+    "id": "g47",
+    "name": "Renia",
+    "gender": "",
+    "parentIds": [
+      "c11"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g48": {
+    "id": "g48",
+    "name": "John",
+    "gender": "",
+    "parentIds": [
+      "c11"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g49": {
+    "id": "g49",
+    "name": "Fungisai",
+    "gender": "",
+    "parentIds": [
+      "c12"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g50": {
+    "id": "g50",
+    "name": "Sithokozile",
+    "gender": "",
+    "parentIds": [
+      "c12"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g51": {
+    "id": "g51",
+    "name": "Zvisinei",
+    "gender": "",
+    "parentIds": [
+      "c12"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g52": {
+    "id": "g52",
+    "name": "Maxiwell",
+    "gender": "",
+    "parentIds": [
+      "c13"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g53": {
+    "id": "g53",
+    "name": "Brian Nyikadzino",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g54": {
+    "id": "g54",
+    "name": "Gertrude",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g55": {
+    "id": "g55",
+    "name": "Jameson Ticharwa",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g56": {
+    "id": "g56",
+    "name": "Preciuos Pepukai",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g57": {
+    "id": "g57",
+    "name": "Brighton",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g58": {
+    "id": "g58",
+    "name": "Terence",
+    "gender": "",
+    "parentIds": [
+      "c15"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g59": {
+    "id": "g59",
+    "name": "Josephat Cornelius",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g60": {
+    "id": "g60",
+    "name": "Jason",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g61": {
+    "id": "g61",
+    "name": "Nelia",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g62": {
+    "id": "g62",
+    "name": "Tafadzwa",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g63": {
+    "id": "g63",
+    "name": "Redemptor Tatenda",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g64": {
+    "id": "g64",
+    "name": "Vimbai (late)",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g65": {
+    "id": "g65",
+    "name": "Kudakwashe",
+    "gender": "",
+    "parentIds": [
+      "c16"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g66": {
+    "id": "g66",
+    "name": "Fortunate (twin #1)",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g67": {
+    "id": "g67",
+    "name": "Francis",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g68": {
+    "id": "g68",
+    "name": "Florence",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g69": {
+    "id": "g69",
+    "name": "Faith (twin #2, late)",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g70": {
+    "id": "g70",
+    "name": "Felistas",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g71": {
+    "id": "g71",
+    "name": "Future",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g72": {
+    "id": "g72",
+    "name": "Felicity Paidashe",
+    "gender": "",
+    "parentIds": [
+      "c17"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g73": {
+    "id": "g73",
+    "name": "Ronald Zvikomborero",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g74": {
+    "id": "g74",
+    "name": "Gertrude Kudzai",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g75": {
+    "id": "g75",
+    "name": "Redempta Gamuchirai",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g76": {
+    "id": "g76",
+    "name": "Fortunate (late)",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g77": {
+    "id": "g77",
+    "name": "Tonderai Lloyd",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g78": {
+    "id": "g78",
+    "name": "Jubilee",
+    "gender": "",
+    "parentIds": [
+      "c18"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g79": {
+    "id": "g79",
+    "name": "Clifford",
+    "gender": "",
+    "parentIds": [
+      "c19"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g80": {
+    "id": "g80",
+    "name": "Edwin",
+    "gender": "",
+    "parentIds": [
+      "c19"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g81": {
+    "id": "g81",
+    "name": "Martha",
+    "gender": "",
+    "parentIds": [
+      "c19"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g82": {
+    "id": "g82",
+    "name": "Natasha (late)",
+    "gender": "",
+    "parentIds": [
+      "c19"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g83": {
+    "id": "g83",
+    "name": "Takudzwa (late)",
+    "gender": "",
+    "parentIds": [
+      "c19"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g_extra1": {
+    "id": "g_extra1",
+    "name": "Sharon",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Labelled 'Graduate' in the original file. Exact parent unclear (may be a grandchild rather than Gilbert's direct child) — please confirm.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  },
+  "g_extra2": {
+    "id": "g_extra2",
+    "name": "Norwell",
+    "gender": "",
+    "parentIds": [
+      "c8"
+    ],
+    "spouseIds": [],
+    "aka": "",
+    "years": "",
+    "status": "",
+    "notes": "Labelled 'Graduate' in the original file. Exact parent unclear (may be a grandchild rather than Gilbert's direct child) — please confirm.",
+    "sourceRef": "Oral tradition (from original family tree file)",
+    "branch": ""
+  }
+}

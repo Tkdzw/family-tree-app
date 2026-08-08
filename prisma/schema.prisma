@@ -26,8 +26,18 @@ model Person {
   totem           String?
   notes           String?
   sourceNote      String?          // free-text for now: "Oral history — Uncle X, 2025-08-19"
+  branch          String?          // "Chiwashira" | "Ziwenga" | null — informational tag, not a relationship
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // UNVERIFIED display-only grouping — which wife a child is shown under in
+  // the UI. This is deliberately NOT a ParentChild row: we don't actually
+  // know the mother, so we don't record a false biological fact. It's just
+  // a placeholder so the tree can be browsed grouped by wife until real
+  // assignments are confirmed. Safe to overwrite/clear at any time.
+  placeholderMother   Person?  @relation("PlaceholderMotherOf", fields: [placeholderMotherId], references: [id], onDelete: SetNull)
+  placeholderMotherId String?
+  placeholderChildren Person[] @relation("PlaceholderMotherOf")
 
   // this person as a CHILD in parent/child links (i.e. links to their parents)
   parentLinks ParentChild[] @relation("ChildLinks")
