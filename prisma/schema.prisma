@@ -1,0 +1,64 @@
+// Chiwashira–Ziwenga Family Tree — Phase 0 schema
+// Deliberately minimal: Source/Confidence get flat fields for now (see sourceNote),
+// not their own tables, until there's real conflicting data to justify the overhead.
+// See family-tree-build-plan.md for the phased reasoning.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Person {
+  id              String   @id @default(cuid())
+  firstName       String
+  otherNames      String?
+  surname         String?
+  gender          String?          // "M" | "F" | "unknown"
+  birthYear       Int?
+  birthYearApprox Boolean  @default(false)
+  birthPlace      String?
+  deceased        Boolean  @default(false)
+  deathYear       Int?
+  totem           String?
+  notes           String?
+  sourceNote      String?          // free-text for now: "Oral history — Uncle X, 2025-08-19"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // this person as a CHILD in parent/child links (i.e. links to their parents)
+  parentLinks ParentChild[] @relation("ChildLinks")
+  // this person as a PARENT in parent/child links (i.e. links to their children)
+  childLinks  ParentChild[] @relation("ParentLinks")
+
+  unionsAsA Union[] @relation("PartnerA")
+  unionsAsB Union[] @relation("PartnerB")
+
+  @@index([firstName, surname])
+}
+
+model ParentChild {
+  id       String @id @default(cuid())
+  parent   Person @relation("ParentLinks", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId String
+  child    Person @relation("ChildLinks", fields: [childId], references: [id], onDelete: Cascade)
+  childId  String
+  relType  String @default("biological") // biological | adoptive | step | unknown
+
+  @@unique([parentId, childId])
+  @@index([childId])
+  @@index([parentId])
+}
+
+model Union {
+  id         String  @id @default(cuid())
+  partnerA   Person  @relation("PartnerA", fields: [partnerAId], references: [id], onDelete: Cascade)
+  partnerAId String
+  partnerB   Person? @relation("PartnerB", fields: [partnerBId], references: [id], onDelete: SetNull)
+  partnerBId String?
+  type       String? // marriage | traditional | partnership | unknown
+  notes      String?
+}
