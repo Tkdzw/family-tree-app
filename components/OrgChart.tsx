@@ -1,0 +1,90 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useHighlight } from "./highlight-context";
+
+export type OrgNode = {
+  id: string;
+  label: string;
+  deceased?: boolean;
+  branch?: string | null;
+  tag?: string; // small label under the name, e.g. "unverified" or "7 wives"
+  children: OrgNode[];
+};
+
+function nodeOrDescendantMatches(node: OrgNode, query: string): boolean {
+  if (!query) return false;
+  const q = query.toLowerCase();
+  if (node.label.toLowerCase().includes(q)) return true;
+  return node.children.some((c) => nodeOrDescendantMatches(c, query));
+}
+
+function nodeOrDescendantHighlighted(node: OrgNode, highlight: Set<string>): boolean {
+  if (highlight.has(node.id)) return true;
+  return node.children.some((c) => nodeOrDescendantHighlighted(c, highlight));
+}
+
+function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; query: string }) {
+  const highlight = useHighlight();
+  const hasChildren = node.children.length > 0;
+
+  const selfTextMatch = query.length > 0 && node.label.toLowerCase().includes(query.toLowerCase());
+  const descendantTextMatch = query.length > 0 && node.children.some((c) => nodeOrDescendantMatches(c, query));
+
+  const onHighlightPath = highlight ? highlight.has(node.id) : false;
+  const descendantHighlighted = highlight ? node.children.some((c) => nodeOrDescendantHighlighted(c, highlight)) : false;
+  const dimmed = highlight !== null && !onHighlightPath && !descendantHighlighted;
+
+  // default open depth: patriarch(0), wife tier(1), children(2) visible; deeper collapses
+  const defaultOpen = depth < 2 || selfTextMatch || descendantTextMatch || onHighlightPath || descendantHighlighted;
+  const [open, setOpen] = useState(defaultOpen);
+
+  if (query && !selfTextMatch && !descendantTextMatch) return null;
+
+  const showChildren = hasChildren && (open || descendantTextMatch || descendantHighlighted);
+
+  return (
+    <li>
+      <div
+        onClick={() => hasChildren && setOpen((o) => !o)}
+        className={`inline-flex flex-col items-center gap-0.5 bg-panel border rounded-sm px-3.5 py-2.5 min-w-[110px] max-w-[170px] transition-all ${
+          hasChildren ? "cursor-pointer" : ""
+        } ${selfTextMatch || onHighlightPath ? "border-gold" : "border-panelLine"} ${dimmed ? "opacity-30" : ""}`}
+      >
+        <span className={`font-display text-[13.5px] leading-tight text-center ${selfTextMatch || onHighlightPath ? "text-gold" : "text-bone"}`}>
+          {node.deceased && <span className="text-rust mr-0.5">†</span>}
+          <Link href={`/person/${node.id}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+            {node.label}
+          </Link>
+          {onHighlightPath && <span className="text-gold ml-0.5">★</span>}
+        </span>
+        {node.tag && (
+          <span className="font-mono text-[8.5px] uppercase tracking-wide text-rust">{node.tag}</span>
+        )}
+        {hasChildren && (
+          <span className="font-mono text-[9px] text-boneDim/70">
+            {open ? "▲" : "▼"} {node.children.length}
+          </span>
+        )}
+      </div>
+      {showChildren && (
+        <ul>
+          {node.children.map((child) => (
+            <OrgNodeItem key={child.id} node={child} depth={depth + 1} query={query} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+export default function OrgChart({ root, query }: { root: OrgNode; query: string }) {
+  return (
+    <div className="overflow-x-auto pb-6 -mx-5 px-5">
+      <ul className="org-tree inline-flex min-w-full justify-center">
+        <OrgNodeItem node={root} depth={0} query={query} />
+      </ul>
+    </div>
+  );
+}

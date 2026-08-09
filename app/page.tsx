@@ -3,7 +3,7 @@ import TreeView from "@/components/TreeView";
 
 export const dynamic = "force-dynamic"; // always read fresh data, no static caching
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: { me?: string } }) {
   const view = await getPatriarchView();
 
   if (!view) {
@@ -30,6 +30,7 @@ export default async function Home() {
       wifeGroups={view.wifeGroups}
       unassignedChildren={view.unassignedChildren}
       stats={view.stats}
+      initialMeId={searchParams.me}
     />
   );
 }

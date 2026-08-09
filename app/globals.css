@@ -15,3 +15,72 @@ body {
 .child-row-dashed:last-child {
   border-bottom: none;
 }
+
+/* Organogram connectors — classic CSS org-chart technique, adapted to the
+   dark/gold palette. Each <li> draws its own connecting lines via
+   pseudo-elements so the whole structure works for any width/depth. */
+.org-tree ul {
+  display: flex;
+  justify-content: center;
+  padding-top: 28px;
+  position: relative;
+}
+.org-tree li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  list-style: none;
+  position: relative;
+  padding: 28px 10px 0 10px;
+}
+.org-tree li::before,
+.org-tree li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 50%;
+  border-top: 1px solid #4d5b46;
+  width: 50%;
+  height: 28px;
+}
+.org-tree li::after {
+  right: auto;
+  left: 50%;
+  border-left: 1px solid #4d5b46;
+}
+.org-tree li:only-child::before,
+.org-tree li:only-child::after {
+  display: none;
+}
+.org-tree li:only-child {
+  padding-top: 0;
+}
+.org-tree li:first-child::before {
+  border: none;
+}
+.org-tree li:last-child::after {
+  border: none;
+}
+.org-tree li:first-child::after {
+  border-radius: 4px 0 0 0;
+}
+.org-tree li:last-child::before {
+  border-right: 1px solid #4d5b46;
+  border-radius: 0 4px 0 0;
+}
+.org-tree > li {
+  padding-top: 0;
+}
+.org-tree > li::before,
+.org-tree > li::after {
+  display: none;
+}
+.org-tree ul::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  border-left: 1px solid #4d5b46;
+  width: 0;
+  height: 28px;
+}

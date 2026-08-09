@@ -86,6 +86,79 @@ and "Mununuri Godfery" (also Ben's) got split into two separate people,
 "Mununuri" and "Godfrey." Worth confirming which version is correct before
 this data goes out to the wider family.
 
+## Editing and verifying data in the app
+
+Every person now has an editable profile page (`/person/[id]`) — no more
+needing Prisma Studio for routine corrections:
+
+- **"Edit details"** (collapsed by default) lets you fix name, gender, totem,
+  birth year/place, deceased status, notes, and source — for anyone.
+- **For Nyikadzino's 21 children specifically**, there's a dedicated "Mother
+  (wife)" box: it shows the current placeholder guess, lets you change it via
+  a dropdown, and has a "Confirmed — lock this in" checkbox. Checking that
+  box before saving converts the placeholder into a real, verified
+  `ParentChild` record — the child now has an actual recorded mother, not
+  just a guess. A verified assignment shows a "remove" link if it turns out
+  to be wrong.
+- The tree view itself now shows **"✓ mother confirmed" / "mother
+  unverified"** on every child card, and each wife's section header shows
+  a running **"x/y confirmed"** count — so you can see at a glance how much
+  of the grouping is still placeholder versus actually verified.
+
+This is all built on top of the same `placeholderMotherId` vs. real
+`ParentChild` distinction from before: confirming a child's mother here
+does exactly what manually editing `prisma/seed.ts` would have done, just
+without needing to touch code or re-seed.
+
+## Editing wives and adding/linking relationships
+
+Every profile page (including each wife's) now shows a **Spouses** section
+alongside Parents/Siblings/Children — so a wife's own page shows Nyikadzino
+as her spouse, and his page lists all of his wives. Renaming a wife from
+"Wife I" to her real name is just the existing "Edit details" form on her
+own profile — nothing wife-specific needed there.
+
+New on every profile, under **"Add or link a relative"**:
+
+- **Add a new child** — name + gender, creates the person and links them as
+  a child of whoever's profile you're on.
+- **Add a new spouse** — same, but creates a `Union` instead of a
+  `ParentChild` link. This is how you'd add an 8th wife if one turns up, or
+  add a spouse for anyone else in the tree.
+- **Link an existing person** — search-select anyone already in the tree and
+  connect them as this person's parent, child, or spouse. Useful for fixing
+  a missing father link, or connecting two branches that turn out to be the
+  same family once you have more information.
+
+All of this writes real relationship rows (`ParentChild` / `Union`), not
+placeholders — the only placeholder mechanism in the whole app is the wife
+grouping described above, and that one gets promoted to a real link the
+moment you check "Confirmed."
+
+## Organogram layout
+
+The homepage is now a real org-chart, not accordion cards:
+
+- **Patriarch at the top**, connected down to his **wives** side by side
+  (classic org-chart connector lines — a horizontal bar linking the wives,
+  a vertical stem down from the patriarch).
+- **Each wife connects down to her own children**, left to right in the
+  same order used throughout the app.
+- **If a person has no spouse on file** (true for literally everyone below
+  the wife tier right now, since only Nyikadzino's marriages are recorded),
+  their children just sit directly beneath them — no empty spouse tier
+  rendered. The chart applies this rule recursively, so grandchildren and
+  further generations render the same way once that data exists.
+- The chart is built once from the same live data as before
+  (`components/OrgChart.tsx`, fed by a small `TreeNode → OrgNode` transform
+  in `TreeView.tsx`) — nothing new to seed or migrate for this change.
+- It opens three tiers deep by default (patriarch → wives → children) and
+  collapses further generations behind a click, since a fully-expanded chart
+  of 100+ people would be unusably wide. Search and "find me" still work —
+  a match auto-expands the path down to it.
+- Horizontal scrolling handles width on both desktop and mobile (`overflow-x-auto`
+  on the chart container) rather than trying to shrink boxes to fit.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no

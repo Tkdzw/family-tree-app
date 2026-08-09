@@ -71,6 +71,7 @@ export type PersonProfile = {
   parents: PersonRef[];
   children: PersonRef[];
   siblings: PersonRef[];
+  spouses: PersonRef[];
   ancestorPath: PersonRef[]; // root ... parent (not including self)
 };
 
@@ -89,6 +90,13 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
     }
   }
 
+  const unions = await prisma.union.findMany({
+    where: { OR: [{ partnerAId: id }, { partnerBId: id }] },
+  });
+  const spouseIds = unions
+    .map((u) => (u.partnerAId === id ? u.partnerBId : u.partnerAId))
+    .filter((sid): sid is string => !!sid && g.byId.has(sid));
+
   // ancestor path: walk up via first recorded parent (most people currently
   // have at most one parent on file — this walks whichever chain exists)
   const ancestorPath: PersonRef[] = [];
@@ -105,6 +113,7 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
     parents: parentIds.map((pid) => toRef(g, pid)),
     children: childIds.map((cid) => toRef(g, cid)),
     siblings: [...siblingIds].map((sid) => toRef(g, sid)),
+    spouses: spouseIds.map((sid) => toRef(g, sid)),
     ancestorPath,
   };
 }
