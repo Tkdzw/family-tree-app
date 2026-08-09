@@ -13,6 +13,7 @@ export type TreeNode = {
   notes: string | null;
   sourceNote: string | null;
   branch: string | null;
+  birthOrder: number | null;
   motherId: string | null; // effective mother: verified ParentChild link if one exists, else the unverified placeholder
   motherVerified: boolean; // true if motherId comes from a real ParentChild row, not just a placeholder guess
   children: TreeNode[];
@@ -108,6 +109,22 @@ function sortById(ids: string[]): string[] {
   });
 }
 
+// Orders a set of siblings by their birthOrder field (lower = older), falling
+// back to the numeric-id ordering for anyone whose birthOrder hasn't been
+// set yet. This is what the reorder buttons on a profile page actually change.
+function sortByBirthOrder(ids: string[], byId: Map<string, { birthOrder: number | null }>): string[] {
+  return [...ids].sort((a, b) => {
+    const oa = byId.get(a)?.birthOrder;
+    const ob = byId.get(b)?.birthOrder;
+    if (oa != null && ob != null) return oa - ob;
+    if (oa != null) return -1;
+    if (ob != null) return 1;
+    const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
+    const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
+    return na - nb;
+  });
+}
+
 
 export async function getPatriarchView(): Promise<PatriarchView | null> {
   const people = await prisma.person.findMany();
@@ -128,7 +145,7 @@ export async function getPatriarchView(): Promise<PatriarchView | null> {
     parentIdsOf.get(l.childId)!.push(l.parentId);
     isChild.add(l.childId);
   }
-  for (const [parentId, kids] of childIdsOf) childIdsOf.set(parentId, sortById(kids));
+  for (const [parentId, kids] of childIdsOf) childIdsOf.set(parentId, sortByBirthOrder(kids, byId));
 
   const rootId = findLineageRootId(people.map((p) => p.id), childIdsOf, isChild);
   if (!rootId) return null;
@@ -180,6 +197,7 @@ export async function getPatriarchView(): Promise<PatriarchView | null> {
       notes: p.notes,
       sourceNote: p.sourceNote,
       branch: p.branch,
+      birthOrder: p.birthOrder,
       motherId: verifiedMotherId ?? p.placeholderMotherId,
       motherVerified: !!verifiedMotherId,
       children: childIds.map((id) => build(id, depth + 1)),

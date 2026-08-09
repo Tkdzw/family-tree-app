@@ -63,7 +63,18 @@ async function main() {
   await prisma.person.deleteMany();
 
   console.log("Creating people...");
+  const birthOrderCounters: Record<string, number> = {};
   for (const p of Object.values(SOURCE)) {
+    // birth order defaults to the file's own listed order within each parent
+    // (source-tree.json is already grouped and ordered per parent) — purely a
+    // starting point, reorder anytime via the profile page's up/down buttons.
+    const primaryParentId = p.parentIds[0];
+    let birthOrder: number | null = null;
+    if (primaryParentId) {
+      birthOrder = birthOrderCounters[primaryParentId] ?? 0;
+      birthOrderCounters[primaryParentId] = birthOrder + 1;
+    }
+
     await prisma.person.create({
       data: {
         id: p.id, // reuse the source file's ids directly — they're already stable and readable
@@ -74,6 +85,7 @@ async function main() {
         sourceNote: p.sourceRef || null,
         branch: p.branch || null,
         placeholderMotherId: PLACEHOLDER_WIFE_MAP[p.id] ?? null,
+        birthOrder,
       },
     });
   }

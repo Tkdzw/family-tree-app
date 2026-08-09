@@ -117,6 +117,53 @@ export async function addNewSpouse(formData: FormData) {
   revalidatePath(`/person/${personId}`);
 }
 
+/**
+ * Moves a child up or down one position in birth order among their full
+ * sibling group (everyone sharing that same parent). Normalizes everyone's
+ * birthOrder to a clean 0..n-1 sequence first, so this works correctly even
+ * for siblings that never had an explicit order set.
+ */
+export async function reorderChild(formData: FormData) {
+  const parentId = formData.get("parentId") as string;
+  const childId = formData.get("childId") as string;
+  const direction = formData.get("direction") as string; // "up" | "down"
+  if (!parentId || !childId) return;
+
+  const links = await prisma.parentChild.findMany({
+    where: { parentId },
+    include: { child: true },
+  });
+
+  const sorted = [...links].sort((a, b) => {
+    const oa = a.child.birthOrder;
+    const ob = b.child.birthOrder;
+    if (oa != null && ob != null) return oa - ob;
+    if (oa != null) return -1;
+    if (ob != null) return 1;
+    const na = parseInt(a.childId.replace(/\D/g, ""), 10) || 0;
+    const nb = parseInt(b.childId.replace(/\D/g, ""), 10) || 0;
+    return na - nb;
+  });
+
+  const idx = sorted.findIndex((l) => l.childId === childId);
+  if (idx === -1) return;
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= sorted.length) return; // already at an end
+
+  // normalize everyone to a clean sequential order matching current display order
+  await Promise.all(sorted.map((link, i) => prisma.person.update({ where: { id: link.childId }, data: { birthOrder: i } })));
+
+  // then swap the two positions being moved
+  const movedId = sorted[idx].childId;
+  const swappedId = sorted[swapIdx].childId;
+  await prisma.person.update({ where: { id: movedId }, data: { birthOrder: swapIdx } });
+  await prisma.person.update({ where: { id: swappedId }, data: { birthOrder: idx } });
+
+  revalidatePath("/");
+  revalidatePath(`/person/${parentId}`);
+  for (const link of sorted) revalidatePath(`/person/${link.childId}`);
+}
+
 /** Links two already-existing people with a chosen relationship. */
 export async function linkExistingRelative(formData: FormData) {
   const personId = formData.get("personId") as string;

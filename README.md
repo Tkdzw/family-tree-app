@@ -159,6 +159,26 @@ The homepage is now a real org-chart, not accordion cards:
 - Horizontal scrolling handles width on both desktop and mobile (`overflow-x-auto`
   on the chart container) rather than trying to shrink boxes to fit.
 
+## Birth order
+
+Every person now has a `birthOrder` field (seeded from the order they
+appear in `source-tree.json`, which is already grouped and ordered per
+parent — so nothing looks different until you actually reorder someone).
+
+- **On any profile page, the Children section has ▲▼ buttons** next to each
+  child to move them up or down among their siblings. This is a real
+  migration (`birthOrder Int?` on `Person`), so `npm run db:migrate` picks
+  it up automatically.
+- **The Siblings section now shows the full sibling group, including the
+  person whose profile you're on** — not just "everyone else." Their own
+  entry is highlighted (gold background, "you are here") right at their
+  actual birth position, with the same ▲▼ controls available there too, so
+  you can nudge someone's position from either their own page or a
+  sibling's.
+- This same ordering now drives the **organogram** as well — children render
+  left to right in birth order, so reordering here changes what you see on
+  the homepage tree too.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no

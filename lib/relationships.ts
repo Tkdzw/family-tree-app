@@ -9,12 +9,37 @@ export type PersonRef = {
 };
 
 type Graph = {
-  byId: Map<string, PersonRef & { totem: string | null; birthYear: number | null; birthYearApprox: boolean; birthPlace: string | null; notes: string | null; sourceNote: string | null; gender: string | null }>;
+  byId: Map<
+    string,
+    PersonRef & {
+      totem: string | null;
+      birthYear: number | null;
+      birthYearApprox: boolean;
+      birthPlace: string | null;
+      notes: string | null;
+      sourceNote: string | null;
+      gender: string | null;
+      birthOrder: number | null;
+    }
+  >;
   parentsOf: Map<string, string[]>;
   childrenOf: Map<string, string[]>;
   adjacency: Map<string, string[]>;
   rootId: string | null;
 };
+
+function sortByBirthOrder(ids: string[], g: Graph): string[] {
+  return [...ids].sort((a, b) => {
+    const oa = g.byId.get(a)?.birthOrder;
+    const ob = g.byId.get(b)?.birthOrder;
+    if (oa != null && ob != null) return oa - ob;
+    if (oa != null) return -1;
+    if (ob != null) return 1;
+    const na = parseInt(a.replace(/\D/g, ""), 10) || 0;
+    const nb = parseInt(b.replace(/\D/g, ""), 10) || 0;
+    return na - nb;
+  });
+}
 
 async function loadGraph(): Promise<Graph> {
   const people = await prisma.person.findMany();
@@ -35,6 +60,7 @@ async function loadGraph(): Promise<Graph> {
         notes: p.notes,
         sourceNote: p.sourceNote,
         gender: p.gender,
+        birthOrder: p.birthOrder,
       },
     ])
   );
@@ -59,7 +85,11 @@ async function loadGraph(): Promise<Graph> {
 
   const rootId = findLineageRootId(people.map((p) => p.id), childrenOf, isChild);
 
-  return { byId, parentsOf, childrenOf, adjacency, rootId };
+  const graph = { byId, parentsOf, childrenOf, adjacency, rootId };
+  // now that byId exists, sort each parent's children by birth order
+  for (const [parentId, kids] of childrenOf) childrenOf.set(parentId, sortByBirthOrder(kids, graph));
+
+  return graph;
 }
 
 function toRef(g: Graph, id: string): PersonRef {
@@ -67,11 +97,13 @@ function toRef(g: Graph, id: string): PersonRef {
   return { id: p.id, name: p.name, surname: p.surname, deceased: p.deceased };
 }
 
+export type SiblingEntry = PersonRef & { birthOrder: number | null; isSelf: boolean; position: number };
+
 export type PersonProfile = {
-  person: PersonRef & { totem: string | null; birthYear: number | null; birthYearApprox: boolean; birthPlace: string | null; notes: string | null; sourceNote: string | null; gender: string | null };
+  person: PersonRef & { totem: string | null; birthYear: number | null; birthYearApprox: boolean; birthPlace: string | null; notes: string | null; sourceNote: string | null; gender: string | null; birthOrder: number | null };
   parents: PersonRef[];
   children: PersonRef[];
-  siblings: PersonRef[];
+  siblingGroup: SiblingEntry[]; // full sibling set INCLUDING self, ordered by birth position
   spouses: PersonRef[];
   ancestorPath: PersonRef[]; // root ... parent (not including self)
 };
@@ -84,12 +116,20 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
   const parentIds = g.parentsOf.get(id) ?? [];
   const childIds = g.childrenOf.get(id) ?? [];
 
-  const siblingIds = new Set<string>();
+  // full sibling group (everyone who shares at least one parent with this
+  // person, including the person themself), ordered by birth position
+  const siblingGroupIds = new Set<string>([id]);
   for (const parentId of parentIds) {
     for (const sibId of g.childrenOf.get(parentId) ?? []) {
-      if (sibId !== id) siblingIds.add(sibId);
+      siblingGroupIds.add(sibId);
     }
   }
+  const orderedSiblingIds = sortByBirthOrder([...siblingGroupIds], g);
+  const siblingGroup: SiblingEntry[] = orderedSiblingIds.map((sid, i) => {
+    const ref = toRef(g, sid);
+    const birthOrder = g.byId.get(sid)?.birthOrder ?? null;
+    return { ...ref, birthOrder, isSelf: sid === id, position: i + 1 };
+  });
 
   const unions = await prisma.union.findMany({
     where: { OR: [{ partnerAId: id }, { partnerBId: id }] },
@@ -113,7 +153,7 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
     person: p,
     parents: parentIds.map((pid) => toRef(g, pid)),
     children: childIds.map((cid) => toRef(g, cid)),
-    siblings: [...siblingIds].map((sid) => toRef(g, sid)),
+    siblingGroup,
     spouses: spouseIds.map((sid) => toRef(g, sid)),
     ancestorPath,
   };
