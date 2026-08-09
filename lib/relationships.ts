@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { findLineageRootId } from "./tree";
 
 export type PersonRef = {
   id: string;
@@ -56,7 +57,7 @@ async function loadGraph(): Promise<Graph> {
     isChild.add(l.childId);
   }
 
-  const rootId = people.find((p) => !isChild.has(p.id))?.id ?? null;
+  const rootId = findLineageRootId(people.map((p) => p.id), childrenOf, isChild);
 
   return { byId, parentsOf, childrenOf, adjacency, rootId };
 }

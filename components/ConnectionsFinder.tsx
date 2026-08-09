@@ -74,9 +74,14 @@ function PersonPicker({
   );
 }
 
+// step.relationToPrevious describes the CURRENT person relative to the
+// PREVIOUS one ("parent" = current is previous's parent). But the label is
+// displayed reading top-to-bottom as "[previous] [label] [current]", so the
+// text shown has to describe the *previous* person relative to the current
+// one — the inverse of the stored value.
 function relationLabel(rel: "start" | "parent" | "child") {
-  if (rel === "parent") return "parent of";
-  if (rel === "child") return "child of";
+  if (rel === "parent") return "child of"; // current is previous's parent -> previous is child of current
+  if (rel === "child") return "parent of"; // current is previous's child -> previous is parent of current
   return "";
 }
 
