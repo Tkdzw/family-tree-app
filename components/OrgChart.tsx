@@ -10,6 +10,7 @@ export type OrgNode = {
   deceased?: boolean;
   branch?: string | null;
   tag?: string; // small label under the name, e.g. "unverified" or "7 wives"
+  tagTone?: "warning" | "info"; // "warning" (rust, default) for data-quality flags, "info" (gold) for neutral labels like "Person A"
   children: OrgNode[];
 };
 
@@ -25,7 +26,7 @@ function nodeOrDescendantHighlighted(node: OrgNode, highlight: Set<string>): boo
   return node.children.some((c) => nodeOrDescendantHighlighted(c, highlight));
 }
 
-function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; query: string }) {
+function OrgNodeItem({ node, depth, query, expandAll }: { node: OrgNode; depth: number; query: string; expandAll?: boolean }) {
   const highlight = useHighlight();
   const hasChildren = node.children.length > 0;
 
@@ -36,8 +37,9 @@ function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; que
   const descendantHighlighted = highlight ? node.children.some((c) => nodeOrDescendantHighlighted(c, highlight)) : false;
   const dimmed = highlight !== null && !onHighlightPath && !descendantHighlighted;
 
-  // default open depth: patriarch(0), wife tier(1), children(2) visible; deeper collapses
-  const defaultOpen = depth < 2 || selfTextMatch || descendantTextMatch || onHighlightPath || descendantHighlighted;
+  // default open depth: patriarch(0), wife tier(1), children(2) visible; deeper collapses.
+  // expandAll skips the depth cutoff entirely — used for small trees like a single connection path.
+  const defaultOpen = expandAll || depth < 2 || selfTextMatch || descendantTextMatch || onHighlightPath || descendantHighlighted;
   const [open, setOpen] = useState(defaultOpen);
 
   if (query && !selfTextMatch && !descendantTextMatch) return null;
@@ -60,7 +62,9 @@ function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; que
           {onHighlightPath && <span className="text-gold ml-0.5">★</span>}
         </span>
         {node.tag && (
-          <span className="font-mono text-[8.5px] uppercase tracking-wide text-rust">{node.tag}</span>
+          <span className={`font-mono text-[8.5px] uppercase tracking-wide ${node.tagTone === "info" ? "text-gold" : "text-rust"}`}>
+            {node.tag}
+          </span>
         )}
         {hasChildren && (
           <span className="font-mono text-[9px] text-boneDim/70">
@@ -71,7 +75,7 @@ function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; que
       {showChildren && (
         <ul>
           {node.children.map((child) => (
-            <OrgNodeItem key={child.id} node={child} depth={depth + 1} query={query} />
+            <OrgNodeItem key={child.id} node={child} depth={depth + 1} query={query} expandAll={expandAll} />
           ))}
         </ul>
       )}
@@ -79,11 +83,11 @@ function OrgNodeItem({ node, depth, query }: { node: OrgNode; depth: number; que
   );
 }
 
-export default function OrgChart({ root, query }: { root: OrgNode; query: string }) {
+export default function OrgChart({ root, query, expandAll }: { root: OrgNode; query: string; expandAll?: boolean }) {
   return (
     <div className="overflow-x-auto pb-6 -mx-5 px-5">
       <ul className="org-tree inline-flex min-w-full justify-center">
-        <OrgNodeItem node={root} depth={0} query={query} />
+        <OrgNodeItem node={root} depth={0} query={query} expandAll={expandAll} />
       </ul>
     </div>
   );

@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import type { FlatPerson } from "@/lib/relationships";
-import type { ConnectionResult } from "@/lib/relationships";
+import type { FlatPerson, PersonRef, ConnectionResult } from "@/lib/relationships";
+import OrgChart, { type OrgNode } from "./OrgChart";
 
 function PersonPicker({
   label,
@@ -74,6 +74,53 @@ function PersonPicker({
   );
 }
 
+function personLabel(p: PersonRef) {
+  return `${p.name}${p.surname ? ` ${p.surname}` : ""}`;
+}
+
+/**
+ * Reshapes the flat A-to-B path into a small two-branch tree rooted at the
+ * common ancestor, so it can be rendered with the same OrgChart component
+ * used on the main tree page — ancestor at top, one branch down to Person A,
+ * one branch down to Person B.
+ */
+function buildConnectionTree(result: ConnectionResult): OrgNode {
+  const peak = result.generationsFromAToAncestor;
+  const { path } = result;
+
+  function chain(steps: PersonRef[], endTag: string): OrgNode | null {
+    if (steps.length === 0) return null;
+    let node: OrgNode = {
+      id: steps[steps.length - 1].id,
+      label: personLabel(steps[steps.length - 1]),
+      deceased: steps[steps.length - 1].deceased,
+      tag: endTag,
+      tagTone: "info",
+      children: [],
+    };
+    for (let i = steps.length - 2; i >= 0; i--) {
+      node = { id: steps[i].id, label: personLabel(steps[i]), deceased: steps[i].deceased, children: [node] };
+    }
+    return node;
+  }
+
+  const branchAaSteps = path.slice(0, peak).reverse().map((s) => s.person); // ancestor's child ... down to A
+  const branchBaSteps = path.slice(peak + 1).map((s) => s.person); // ancestor's child ... down to B
+
+  const children: OrgNode[] = [];
+  const branchA = chain(branchAaSteps, "Person A");
+  if (branchA) children.push(branchA);
+  const branchB = chain(branchBaSteps, "Person B");
+  if (branchB) children.push(branchB);
+
+  const ancestor = path[peak].person;
+  const isAncestorAlsoA = peak === 0;
+  const isAncestorAlsoB = peak === path.length - 1;
+  const tag = isAncestorAlsoA ? "Person A · common ancestor" : isAncestorAlsoB ? "Person B · common ancestor" : "common ancestor";
+
+  return { id: ancestor.id, label: personLabel(ancestor), deceased: ancestor.deceased, tag, tagTone: "info", children };
+}
+
 // step.relationToPrevious describes the CURRENT person relative to the
 // PREVIOUS one ("parent" = current is previous's parent). But the label is
 // displayed reading top-to-bottom as "[previous] [label] [current]", so the
@@ -138,6 +185,13 @@ export default function ConnectionsFinder({ people, initialA }: { people: FlatPe
               )}
             </p>
           )}
+
+          {result.path.length > 1 && (
+            <div className="mb-6 -mx-5 px-5 border-b border-panelLine pb-2">
+              <OrgChart root={buildConnectionTree(result)} query="" expandAll />
+            </div>
+          )}
+
           <div className="flex flex-col gap-1">
             {result.path.map((step, i) => (
               <div key={step.person.id} className="flex items-center gap-3">
