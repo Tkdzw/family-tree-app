@@ -24,8 +24,17 @@ as an alternate view (Phase 2/3) if it turns out to be wanted alongside this one
 
 ## Setup
 
-1. **Get a Postgres database.** Free-tier options that work fine at this scale:
-   [Neon](https://neon.tech), [Supabase](https://supabase.com). Or self-host.
+1. **Get a Postgres database.** Easiest if you have Docker installed:
+   ```bash
+   docker compose up -d
+   ```
+   This starts Postgres locally with `docker-compose.yml` in this repo — no
+   account, no hosted service, data persists in a Docker volume between
+   restarts. `.env.example` already has the matching connection string.
+
+   Don't have Docker? Either free-tier hosted options work fine at this
+   scale ([Neon](https://neon.tech), [Supabase](https://supabase.com)), or
+   install Postgres locally yourself.
 
 2. **Install dependencies:**
    ```bash
@@ -35,7 +44,8 @@ as an alternate view (Phase 2/3) if it turns out to be wanted alongside this one
 3. **Set your database URL:**
    ```bash
    cp .env.example .env
-   # edit .env, paste your real DATABASE_URL
+   # if you used docker compose, the default value already matches — no edit needed
+   # otherwise, edit .env and paste your real DATABASE_URL
    ```
 
 4. **Create the tables and load the data:**
@@ -179,6 +189,60 @@ parent — so nothing looks different until you actually reorder someone).
   left to right in birth order, so reordering here changes what you see on
   the homepage tree too.
 
+## Backup: export & import
+
+New **Backup** link in the top nav (`/backup`):
+
+- **Export** — downloads a full JSON snapshot of everyone and every
+  relationship: names, notes, sources, branch, birth order, which mother
+  assignments are confirmed vs. still placeholders, all `ParentChild` links,
+  all `Union` (marriage) records. Just a GET request
+  (`app/api/export/route.ts`) with a download header, so the button is a
+  plain link — no JS needed.
+- **Import** — restores the database from a previously exported file. This
+  is a full **replace**, not a merge: everything currently in the database
+  is deleted first, then rebuilt from the file, preserving the original ids
+  so relationships still resolve correctly. The page makes the destructive
+  part explicit (a required "I understand" checkbox before the button
+  works) rather than burying it in fine print.
+
+This is separate from `prisma/seed.ts` on purpose: seeding always loads the
+original `source-tree.json` from scratch, while export/import round-trips
+whatever the database actually looks like right now — including every edit,
+reorder, and confirmed mother assignment made through the app since the
+last seed. Worth downloading a backup before trying anything risky (bulk
+edits, an import, a schema change), since there's currently no undo inside
+the app itself.
+
+## Seed data now comes from a real backup, not the original spreadsheet
+
+`prisma/data/seed-data.json` replaced `source-tree.json` — it's a full
+export taken from the running app (Backup → Export) rather than the
+original one-time spreadsheet conversion. As of this export it has grown to
+**143 people** (up from the original 120 — 23 added through the app since),
+**149 parent/child links**, and **7 unions**.
+
+`prisma/seed.ts` was rewritten to match this format (`people[]` /
+`parentChildLinks[]` / `unions[]` — the same shape `/api/export` produces
+and `/backup`'s import expects), and creates people in **two passes**:
+everyone first, *then* placeholder-mother assignments in a second pass.
+That's not just tidiness — a single-pass version genuinely fails on this
+data, since plain id-sort puts children (`c...`) before wives (`w...`), so
+a child's placeholder-mother foreign key can point at a wife that doesn't
+exist yet. (`app/actions.ts`'s `importBackup` had the same latent bug and
+got the same fix.)
+
+This export predates the birth-order feature, so none of these 143 people
+have a `birthOrder` value in the file. The seed script falls back to each
+child's position in `parentChildLinks` per parent when that happens — same
+convention the very first seed used — so ordering still comes out sensible
+until real birth order gets confirmed.
+
+**To refresh this later:** Backup → Export in the running app, save the
+download over `prisma/data/seed-data.json`, re-run `npm run db:seed`. From
+now on the seed always reflects the actual current state of the tree, not
+just the original import.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no
@@ -197,7 +261,18 @@ not to merge. If the spreadsheet changes, update the `BRANCHES` array in
 
 Any host that runs Next.js works (Vercel is the path of least resistance given
 this stack). Point `DATABASE_URL` at your production Postgres instance and
-you're live — no separate backend needed at this scale.
+you're live — no separate backend needed at this scale. The `docker-compose.yml`
+here is meant for local development, not production; use a real hosted
+Postgres (Neon, Supabase, RDS, or your own server) for anything that needs
+to stay up reliably.
+
+## Stopping / resetting the local database
+
+```bash
+docker compose stop      # stop the container, keep the data
+docker compose down      # stop and remove the container, keep the data (it's in a named volume)
+docker compose down -v   # stop and remove the container AND wipe the data volume — start completely fresh
+```
 
 ## Next: Phase 2
 

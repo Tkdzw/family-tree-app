@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function updatePersonDetails(formData: FormData) {
   const id = formData.get("id") as string;
@@ -188,4 +189,102 @@ export async function linkExistingRelative(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/person/${personId}`);
   revalidatePath(`/person/${otherId}`);
+}
+
+/**
+ * Restores the database from a JSON backup produced by /api/export.
+ * This is a full REPLACE, not a merge — every current Person, ParentChild,
+ * and Union row is deleted first. IDs are preserved from the backup file so
+ * relationships resolve correctly.
+ */
+export async function importBackup(formData: FormData) {
+  const file = formData.get("file") as File | null;
+  if (!file || file.size === 0) {
+    redirect("/backup?error=" + encodeURIComponent("No file selected."));
+  }
+
+  let parsed: {
+    people?: Array<Record<string, unknown>>;
+    parentChildLinks?: Array<{ parentId: string; childId: string; relType?: string }>;
+    unions?: Array<{ partnerAId: string; partnerBId: string; type?: string; notes?: string }>;
+  };
+  try {
+    const text = await file!.text();
+    parsed = JSON.parse(text);
+  } catch {
+    redirect("/backup?error=" + encodeURIComponent("That file isn't valid JSON."));
+  }
+
+  if (!parsed!.people || !Array.isArray(parsed!.people)) {
+    redirect("/backup?error=" + encodeURIComponent("That doesn't look like a family tree backup file — no people[] array found."));
+  }
+
+  let importError: string | null = null;
+  let importedCount = 0;
+  try {
+    await prisma.parentChild.deleteMany();
+    await prisma.union.deleteMany();
+    await prisma.person.deleteMany();
+
+    // Pass 1: create everyone WITHOUT placeholderMotherId. The file's people
+    // order doesn't guarantee a wife record exists before a child that
+    // references her as a placeholder mother (e.g. plain id-sort puts "c..."
+    // before "w..."), so setting that foreign key in the same pass as
+    // creation can fail partway through. Set it in a second pass instead,
+    // once every person already exists.
+    for (const p of parsed!.people!) {
+      await prisma.person.create({
+        data: {
+          id: p.id as string,
+          firstName: p.firstName as string,
+          otherNames: (p.otherNames as string) ?? null,
+          surname: (p.surname as string) ?? null,
+          gender: (p.gender as string) ?? null,
+          birthYear: (p.birthYear as number) ?? null,
+          birthYearApprox: !!p.birthYearApprox,
+          birthPlace: (p.birthPlace as string) ?? null,
+          deceased: !!p.deceased,
+          deathYear: (p.deathYear as number) ?? null,
+          totem: (p.totem as string) ?? null,
+          notes: (p.notes as string) ?? null,
+          sourceNote: (p.sourceNote as string) ?? null,
+          branch: (p.branch as string) ?? null,
+          birthOrder: (p.birthOrder as number) ?? null,
+        },
+      });
+      importedCount++;
+    }
+
+    for (const p of parsed!.people!) {
+      if (p.placeholderMotherId) {
+        await prisma.person.update({
+          where: { id: p.id as string },
+          data: { placeholderMotherId: p.placeholderMotherId as string },
+        });
+      }
+    }
+
+    for (const l of parsed!.parentChildLinks ?? []) {
+      await prisma.parentChild.create({
+        data: { parentId: l.parentId, childId: l.childId, relType: l.relType ?? "biological" },
+      });
+    }
+
+    for (const u of parsed!.unions ?? []) {
+      await prisma.union.create({
+        data: { partnerAId: u.partnerAId, partnerBId: u.partnerBId, type: u.type ?? "unknown", notes: u.notes ?? null },
+      });
+    }
+  } catch (e) {
+    console.error("Import failed:", e);
+    importError =
+      "Import failed partway through — the database may now be in a mixed state. Consider restoring an earlier backup or re-running the seed script.";
+  }
+
+  revalidatePath("/");
+
+  if (importError) {
+    redirect("/backup?error=" + encodeURIComponent(importError));
+  }
+  redirect("/backup?success=1&count=" + importedCount);
 }

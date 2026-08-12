@@ -1,9 +1,14 @@
-// Seeds the database from prisma/data/source-tree.json — a cleaned,
-// id-based export of the family tree (ancestor lineage, 7 wives, 21
-// children, 85 grandchildren), one record per person with explicit
-// parentIds / spouseIds.
+// Seeds the database from prisma/data/seed-data.json — a full export taken
+// from the app itself (Backup -> Export), in the same format /api/export
+// produces and /backup's import expects. This replaced the original
+// spreadsheet-shaped source-tree.json once real editing (added people,
+// confirmed mothers, reordering) started happening through the app — this
+// file IS the current state of the tree, not just the original raw import.
 //
 // Run with: npx prisma db seed
+//
+// To refresh this after further edits: Backup -> Export in the running app,
+// save the download over prisma/data/seed-data.json, then re-run this.
 
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
@@ -13,114 +18,119 @@ const prisma = new PrismaClient();
 
 type SourcePerson = {
   id: string;
-  name: string;
-  gender: string;
-  parentIds: string[];
-  spouseIds: string[];
-  aka: string;
-  years: string;
-  status: string;
-  notes: string;
-  sourceRef: string;
-  branch: string;
+  firstName: string;
+  otherNames: string | null;
+  surname: string | null;
+  gender: string | null;
+  birthYear: number | null;
+  birthYearApprox: boolean;
+  birthPlace: string | null;
+  deceased: boolean;
+  deathYear: number | null;
+  totem: string | null;
+  notes: string | null;
+  sourceNote: string | null;
+  branch: string | null;
+  birthOrder?: number | null; // absent in exports taken before the birth-order feature existed
+  placeholderMotherId: string | null;
 };
 
-const raw = fs.readFileSync(path.join(__dirname, "data", "source-tree.json"), "utf-8");
-const SOURCE: Record<string, SourcePerson> = JSON.parse(raw);
+type SourceLink = { parentId: string; childId: string; relType?: string };
+type SourceUnion = { partnerAId: string; partnerBId: string; type?: string | null; notes?: string | null };
 
-/**
- * PLACEHOLDER wife grouping — none of the 21 children have a mother recorded
- * in the source file (every one says "please assign if known"). Until the
- * real assignments are confirmed with family elders, this block-distributes
- * them evenly across the 7 wives (3 children each, in c1..c21 order) purely
- * so the tree can be browsed grouped by wife.
- *
- * THIS IS NOT VERIFIED DATA. To correct it: edit this map with the real
- * child -> wife assignments, then re-run `npm run db:seed`. Nothing else
- * needs to change — placeholderMotherId is stored separately from the real
- * ParentChild table, so fixing this never touches verified relationships.
- */
-function buildPlaceholderWifeMap(): Record<string, string> {
-  const childIds = Array.from({ length: 21 }, (_, i) => `c${i + 1}`);
-  const wifeIds = Array.from({ length: 7 }, (_, i) => `w${i + 1}`);
-  const map: Record<string, string> = {};
-  childIds.forEach((childId, i) => {
-    const wifeIndex = Math.floor(i / 3); // 3 children per wife, in order
-    map[childId] = wifeIds[wifeIndex];
-  });
-  return map;
+type SourceFile = {
+  people: SourcePerson[];
+  parentChildLinks: SourceLink[];
+  unions: SourceUnion[];
+};
+
+const raw = fs.readFileSync(path.join(__dirname, "data", "seed-data.json"), "utf-8");
+const SOURCE: SourceFile = JSON.parse(raw);
+
+// Older exports (from before the birth-order feature) don't have a
+// birthOrder field at all. When it's missing, fall back to the order each
+// child first appears in parentChildLinks, per parent — same convention the
+// very first seed used. Once a real export includes birthOrder, that value
+// wins and this fallback never runs.
+function computeFallbackBirthOrder(): Record<string, number> {
+  const byChild: Record<string, number> = {};
+  const counters: Record<string, number> = {};
+  for (const link of SOURCE.parentChildLinks) {
+    if (byChild[link.childId] !== undefined) continue; // already assigned via an earlier link
+    const n = counters[link.parentId] ?? 0;
+    counters[link.parentId] = n + 1;
+    byChild[link.childId] = n;
+  }
+  return byChild;
 }
 
-const PLACEHOLDER_WIFE_MAP = buildPlaceholderWifeMap();
-
 async function main() {
-  console.log(`Loaded ${Object.keys(SOURCE).length} people from source-tree.json`);
+  console.log(`Loaded ${SOURCE.people.length} people, ${SOURCE.parentChildLinks.length} parent/child links, ${SOURCE.unions.length} unions from seed-data.json`);
 
   console.log("Clearing existing data...");
   await prisma.parentChild.deleteMany();
   await prisma.union.deleteMany();
-  await prisma.person.updateMany({ data: { placeholderMotherId: null } }).catch(() => {});
   await prisma.person.deleteMany();
 
-  console.log("Creating people...");
-  const birthOrderCounters: Record<string, number> = {};
-  for (const p of Object.values(SOURCE)) {
-    // birth order defaults to the file's own listed order within each parent
-    // (source-tree.json is already grouped and ordered per parent) — purely a
-    // starting point, reorder anytime via the profile page's up/down buttons.
-    const primaryParentId = p.parentIds[0];
-    let birthOrder: number | null = null;
-    if (primaryParentId) {
-      birthOrder = birthOrderCounters[primaryParentId] ?? 0;
-      birthOrderCounters[primaryParentId] = birthOrder + 1;
-    }
+  const fallbackBirthOrder = computeFallbackBirthOrder();
 
+  // Pass 1: create every person WITHOUT placeholderMotherId yet. The file's
+  // own ordering doesn't guarantee a wife record comes before a child that
+  // references her (alphabetically "c..." sorts before "w..."), so setting
+  // that foreign key in the same pass as creation can fail. Set it in a
+  // second pass instead, once everyone already exists.
+  console.log("Creating people...");
+  for (const p of SOURCE.people) {
     await prisma.person.create({
       data: {
-        id: p.id, // reuse the source file's ids directly — they're already stable and readable
-        firstName: p.name,
-        otherNames: p.aka || null,
-        gender: p.gender || null,
-        notes: p.notes || null,
-        sourceNote: p.sourceRef || null,
-        branch: p.branch || null,
-        placeholderMotherId: PLACEHOLDER_WIFE_MAP[p.id] ?? null,
-        birthOrder,
+        id: p.id,
+        firstName: p.firstName,
+        otherNames: p.otherNames ?? null,
+        surname: p.surname ?? null,
+        gender: p.gender ?? null,
+        birthYear: p.birthYear ?? null,
+        birthYearApprox: !!p.birthYearApprox,
+        birthPlace: p.birthPlace ?? null,
+        deceased: !!p.deceased,
+        deathYear: p.deathYear ?? null,
+        totem: p.totem ?? null,
+        notes: p.notes ?? null,
+        sourceNote: p.sourceNote ?? null,
+        branch: p.branch ?? null,
+        birthOrder: p.birthOrder ?? fallbackBirthOrder[p.id] ?? null,
       },
     });
   }
 
+  console.log("Linking placeholder mother assignments...");
+  let placeholderCount = 0;
+  for (const p of SOURCE.people) {
+    if (p.placeholderMotherId) {
+      await prisma.person.update({
+        where: { id: p.id },
+        data: { placeholderMotherId: p.placeholderMotherId },
+      });
+      placeholderCount++;
+    }
+  }
+
   console.log("Creating parent/child links...");
-  let linkCount = 0;
-  for (const p of Object.values(SOURCE)) {
-    for (const parentId of p.parentIds) {
-      if (!SOURCE[parentId]) continue; // guard against dangling refs
-      await prisma.parentChild.create({
-        data: { parentId, childId: p.id, relType: "biological" },
-      });
-      linkCount++;
-    }
+  for (const l of SOURCE.parentChildLinks) {
+    await prisma.parentChild.create({
+      data: { parentId: l.parentId, childId: l.childId, relType: l.relType ?? "biological" },
+    });
   }
 
-  console.log("Creating unions (spouse pairs)...");
-  const seenPairs = new Set<string>();
-  let unionCount = 0;
-  for (const p of Object.values(SOURCE)) {
-    for (const spouseId of p.spouseIds) {
-      if (!SOURCE[spouseId]) continue;
-      const pairKey = [p.id, spouseId].sort().join("|");
-      if (seenPairs.has(pairKey)) continue;
-      seenPairs.add(pairKey);
-      await prisma.union.create({
-        data: { partnerAId: p.id, partnerBId: spouseId, type: "unknown" },
-      });
-      unionCount++;
-    }
+  console.log("Creating unions (marriages)...");
+  for (const u of SOURCE.unions) {
+    await prisma.union.create({
+      data: { partnerAId: u.partnerAId, partnerBId: u.partnerBId, type: u.type ?? "unknown", notes: u.notes ?? null },
+    });
   }
 
-  console.log(`Done. ${Object.keys(SOURCE).length} people, ${linkCount} parent/child links, ${unionCount} unions.`);
-  console.log("Reminder: wife groupings (placeholderMotherId) are an UNVERIFIED placeholder —");
-  console.log("see the comment above PLACEHOLDER_WIFE_MAP in this file to correct them.");
+  console.log(
+    `Done. ${SOURCE.people.length} people, ${SOURCE.parentChildLinks.length} parent/child links, ${SOURCE.unions.length} unions, ${placeholderCount} placeholder mother assignments.`
+  );
 }
 
 main()
