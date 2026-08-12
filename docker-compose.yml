@@ -1,22 +1,21 @@
 services:
   db:
     image: postgres:16-alpine
-    container_name: family-db
+    container_name: family-tree-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-family_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-family_password}
-      POSTGRES_DB: ${POSTGRES_DB:-family-db}
+      POSTGRES_USER: family_tree
+      POSTGRES_PASSWORD: family_tree
+      POSTGRES_DB: family_tree
     ports:
       - "5432:5432"
     volumes:
-      - family_postgres_data:/var/lib/postgresql/data
+      - family_tree_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-family_user} -d ${POSTGRES_DB:-family-db} -h localhost",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U family_tree -d family_tree"]
       interval: 5s
       timeout: 5s
       retries: 10
+
+volumes:
+  family_tree_pgdata:

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPersonProfile, getAllPeopleFlat } from "@/lib/relationships";
 import { getPatriarchView, getWives, getPatriarchId, findNodeInTree } from "@/lib/tree";
-import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse } from "@/app/actions";
+import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse, reorderChild } from "@/app/actions";
 import RelativeLinker from "@/components/RelativeLinker";
 
 function NameLine({ p }: { p: { id: string; name: string; surname: string | null; deceased: boolean } }) {
@@ -19,7 +19,7 @@ export default async function PersonPage({ params }: { params: { id: string } })
   const profile = await getPersonProfile(params.id);
   if (!profile) notFound();
 
-  const { person, parents, children, siblings, spouses, ancestorPath } = profile;
+  const { person, parents, children, siblingGroup, spouses, ancestorPath } = profile;
 
   const allPeople = await getAllPeopleFlat();
 
@@ -168,8 +168,8 @@ export default async function PersonPage({ params }: { params: { id: string } })
 
       <RelationSection title="Parents" people={parents} empty="Not recorded yet." />
       <RelationSection title={`Spouses (${spouses.length})`} people={spouses} empty="None recorded." />
-      <RelationSection title={`Siblings (${siblings.length})`} people={siblings} empty="None recorded." />
-      <RelationSection title={`Children (${children.length})`} people={children} empty="None recorded yet." />
+      <SiblingOrderSection siblingGroup={siblingGroup} parentId={parents[0]?.id} />
+      <ChildrenSection children={children} parentId={person.id} />
 
       {/* Add / link relatives */}
       <details className="mb-8 group">
@@ -319,6 +319,119 @@ function RelationSection({
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+function ReorderButtons({ parentId, childId, disableUp, disableDown }: { parentId: string; childId: string; disableUp: boolean; disableDown: boolean }) {
+  return (
+    <span className="inline-flex gap-1 ml-2">
+      <form action={reorderChild} className="inline">
+        <input type="hidden" name="parentId" value={parentId} />
+        <input type="hidden" name="childId" value={childId} />
+        <input type="hidden" name="direction" value="up" />
+        <button
+          disabled={disableUp}
+          title="Move up (older)"
+          className="w-5 h-5 inline-flex items-center justify-center text-boneDim hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed text-xs"
+        >
+          ▲
+        </button>
+      </form>
+      <form action={reorderChild} className="inline">
+        <input type="hidden" name="parentId" value={parentId} />
+        <input type="hidden" name="childId" value={childId} />
+        <input type="hidden" name="direction" value="down" />
+        <button
+          disabled={disableDown}
+          title="Move down (younger)"
+          className="w-5 h-5 inline-flex items-center justify-center text-boneDim hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed text-xs"
+        >
+          ▼
+        </button>
+      </form>
+    </span>
+  );
+}
+
+/** Full sibling set including self, in birth order, with the current profile highlighted at their position. */
+function SiblingOrderSection({
+  siblingGroup,
+  parentId,
+}: {
+  siblingGroup: { id: string; name: string; surname: string | null; deceased: boolean; birthOrder: number | null; isSelf: boolean; position: number }[];
+  parentId?: string;
+}) {
+  const othersCount = siblingGroup.length - 1;
+  return (
+    <div className="mb-7">
+      <div className="font-mono text-[10.5px] uppercase tracking-wide text-boneDim mb-2.5">
+        Siblings & birth order ({othersCount} {othersCount === 1 ? "other" : "others"})
+      </div>
+      {othersCount === 0 ? (
+        <p className="text-sm text-boneDim italic">No siblings recorded.</p>
+      ) : (
+        <ol className="space-y-1">
+          {siblingGroup.map((s) => (
+            <li
+              key={s.id}
+              className={`flex items-center gap-2.5 text-[15px] rounded-sm px-2 py-1 -mx-2 ${
+                s.isSelf ? "bg-gold/10 border border-goldDim" : ""
+              }`}
+            >
+              <span className="font-mono text-[10px] text-boneDim w-5 flex-none text-right">{s.position}.</span>
+              {s.isSelf ? (
+                <span className="text-gold font-semibold">
+                  {s.deceased && <span className="text-rust mr-1">†</span>}
+                  {s.name}
+                  {s.surname ? ` ${s.surname}` : ""}
+                  <span className="text-[10px] font-mono uppercase tracking-wide ml-2 text-gold/80">you are here</span>
+                </span>
+              ) : (
+                <NameLine p={s} />
+              )}
+              {parentId && (
+                <ReorderButtons
+                  parentId={parentId}
+                  childId={s.id}
+                  disableUp={s.position === 1}
+                  disableDown={s.position === siblingGroup.length}
+                />
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
+    </div>
+  );
+}
+
+/** This person's children, in birth order, with up/down controls to reorder. */
+function ChildrenSection({
+  children,
+  parentId,
+}: {
+  children: { id: string; name: string; surname: string | null; deceased: boolean }[];
+  parentId: string;
+}) {
+  return (
+    <div className="mb-7">
+      <div className="font-mono text-[10.5px] uppercase tracking-wide text-boneDim mb-2.5">
+        Children ({children.length})
+      </div>
+      {children.length === 0 ? (
+        <p className="text-sm text-boneDim italic">None recorded yet.</p>
+      ) : (
+        <ol className="space-y-1">
+          {children.map((c, i) => (
+            <li key={c.id} className="flex items-center gap-2.5 text-[15px]">
+              <span className="font-mono text-[10px] text-boneDim w-5 flex-none text-right">{i + 1}.</span>
+              <NameLine p={c} />
+              <ReorderButtons parentId={parentId} childId={c.id} disableUp={i === 0} disableDown={i === children.length - 1} />
+            </li>
+          ))}
+        </ol>
       )}
     </div>
   );

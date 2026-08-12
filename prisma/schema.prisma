@@ -27,6 +27,7 @@ model Person {
   notes           String?
   sourceNote      String?          // free-text for now: "Oral history — Uncle X, 2025-08-19"
   branch          String?          // "Chiwashira" | "Ziwenga" | null — informational tag, not a relationship
+  birthOrder      Int?             // position among full siblings (same primary parent), lower = older. Editable via the reorder buttons on a profile page.
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

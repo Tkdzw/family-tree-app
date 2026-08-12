@@ -27,6 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/connections" className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
               Relationship Finder
             </Link>
+            <Link href="/backup" className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
+              Backup
+            </Link>
           </div>
         </nav>
         {children}
