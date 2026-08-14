@@ -12,6 +12,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Editors — the small set of people allowed to add/edit/delete data.
+// Accounts are created via /register, gated by a shared invite code
+// (FAMILY_INVITE_CODE env var) rather than open signup, since this is a
+// private family archive, not a public service.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
 model Person {
   id              String   @id @default(cuid())
   firstName       String

@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { auth } from "@/auth";
+import { logoutUser } from "@/app/auth-actions";
 
 export const metadata: Metadata = {
   title: "Nyikadzino's Lineage — Chiwashira & Ziwenga Family Tree",
   description: "Interactive Chiwashira–Ziwenga family tree",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
   return (
     <html lang="en">
       <head>
@@ -30,6 +34,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/backup" className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
               Backup
             </Link>
+            <div className="ml-auto flex items-center gap-4">
+              {session?.user ? (
+                <>
+                  <span className="font-mono text-[11px] uppercase tracking-wide text-goldDim">
+                    ✓ {session.user.name}
+                  </span>
+                  <form action={logoutUser}>
+                    <button className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
+                      Sign out
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <Link href="/login" className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
+                  Editor sign in
+                </Link>
+              )}
+            </div>
           </div>
         </nav>
         {children}

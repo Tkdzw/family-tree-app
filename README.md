@@ -41,11 +41,12 @@ as an alternate view (Phase 2/3) if it turns out to be wanted alongside this one
    npm install
    ```
 
-3. **Set your database URL:**
+3. **Set your database URL, plus two new values for editor accounts:**
    ```bash
    cp .env.example .env
-   # if you used docker compose, the default value already matches — no edit needed
-   # otherwise, edit .env and paste your real DATABASE_URL
+   # DATABASE_URL: if you used docker compose, the default already matches — no edit needed
+   # AUTH_SECRET: generate one with `openssl rand -base64 32` and paste it in
+   # FAMILY_INVITE_CODE: pick anything, share it privately with whoever should be able to edit
    ```
 
 4. **Create the tables and load the data:**
@@ -256,6 +257,38 @@ common ancestor (`describeRelationship()` in `lib/relationships.ts`) — no
 new data required. It's deliberately gender-neutral ("aunt/uncle",
 "niece/nephew") since gender isn't reliably recorded for everyone in the
 tree yet; if that ever changes, this is the one function to revisit.
+
+## Editor accounts — who can view vs. who can edit
+
+**Everyone can browse without an account.** The tree, search, "find me,"
+relationship finder, and backup export are all open to anyone with the
+link — no login involved.
+
+**Adding, editing, deleting, and reordering require signing in.** This is
+Auth.js (Credentials provider, email + password, JWT sessions — no separate
+session table needed) backed by a new `User` model.
+
+- **`/register`** creates an account, but requires the `FAMILY_INVITE_CODE`
+  from your `.env` — this is the actual authorization gate. Share that code
+  privately with whoever you want to be able to edit; anyone without it
+  can't create an account no matter what.
+- **`/login`** signs in with email + password.
+- Signed-in editors see their name and a "Sign out" link in the top nav.
+
+**The access control lives in two places, on purpose:**
+1. Every edit form, add/link panel, and reorder button is hidden from the
+   page entirely for signed-out visitors (`app/person/[id]/page.tsx`,
+   `app/backup/page.tsx` both check `auth()` before rendering them).
+2. Every mutating server action — `updatePersonDetails`, `setChildMother`,
+   `addChild`, `addNewSpouse`, `reorderChild`, `linkExistingRelative`,
+   `importBackup`, and so on — calls `requireAuth()` from `lib/authz.ts` as
+   its first line, before touching the database.
+
+That second layer is the one that actually matters for security. Hiding a
+button in the UI doesn't stop someone from calling the underlying server
+action directly — the real enforcement has to live in the action itself,
+which is what `requireAuth()` does. If you ever add a new mutating action,
+make sure it calls `requireAuth()` first too.
 
 ## Filling the gaps
 
