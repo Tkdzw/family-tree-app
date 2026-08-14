@@ -194,6 +194,65 @@ export type ConnectionResult = {
   generationsFromBToAncestor: number;
 };
 
+function greats(n: number): string {
+  if (n <= 0) return "";
+  if (n <= 4) return "great-".repeat(n);
+  return `${n}x-great-`;
+}
+
+function ordinalWord(n: number): string {
+  const words = ["zeroth", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"];
+  return n < words.length ? words[n] : `${n}th`;
+}
+
+function descendantTerm(depth: number): string {
+  if (depth === 1) return "child";
+  if (depth === 2) return "grandchild";
+  return `${greats(depth - 2)}grandchild`;
+}
+
+function ancestorTerm(depth: number): string {
+  if (depth === 1) return "parent";
+  if (depth === 2) return "grandparent";
+  return `${greats(depth - 2)}grandparent`;
+}
+
+/**
+ * Plain-English relationship summary from each person's generation-distance
+ * to their common ancestor — "first cousins", "aunt/uncle and niece/nephew",
+ * "great-grandparent and great-grandchild", etc. Gender-neutral throughout
+ * since gender isn't reliably recorded for everyone in the tree.
+ */
+export function describeRelationship(aName: string, bName: string, genA: number, genB: number): string {
+  if (genA === 0 && genB === 0) return `${aName} and ${bName} are the same person.`;
+
+  const n = Math.min(genA, genB);
+  const d = Math.abs(genA - genB);
+  const olderIsA = genA < genB; // fewer generations from the ancestor = the older generation
+
+  if (n === 0) {
+    const depth = Math.max(genA, genB);
+    const ancestorName = genA === 0 ? aName : bName;
+    const descName = genA === 0 ? bName : aName;
+    return `${descName} is ${ancestorName}'s ${descendantTerm(depth)} — ${ancestorName} is ${descName}'s ${ancestorTerm(depth)}.`;
+  }
+
+  if (n === 1 && d === 0) {
+    return `${aName} and ${bName} are siblings.`;
+  }
+
+  if (n === 1) {
+    const greatCount = d - 1;
+    const olderName = olderIsA ? aName : bName;
+    const youngerName = olderIsA ? bName : aName;
+    return `${olderName} is ${youngerName}'s ${greats(greatCount)}aunt/uncle — ${youngerName} is ${olderName}'s ${greats(greatCount)}niece/nephew.`;
+  }
+
+  const cousinDegree = n - 1;
+  const removedText = d > 0 ? `, ${d} time${d > 1 ? "s" : ""} removed` : "";
+  return `${aName} and ${bName} are ${ordinalWord(cousinDegree)} cousins${removedText}.`;
+}
+
 /**
  * Shortest path between two people through the parent/child graph, treated as
  * undirected for the search, then labeled with direction for display. Good

@@ -243,6 +243,20 @@ download over `prisma/data/seed-data.json`, re-run `npm run db:seed`. From
 now on the seed always reflects the actual current state of the tree, not
 just the original import.
 
+## Plain-English relationship summary
+
+The Relationship Finder now leads with an actual sentence instead of just
+generation counts — "Otillia and Tafanana are first cousins," "A is B's
+great-aunt/uncle — B is A's great-niece/nephew," "B is A's grandchild — A
+is B's grandparent," and so on. The generation-count line and the org chart
+are still there right below it for anyone who wants the detail.
+
+This is computed purely from each person's generation-distance to the
+common ancestor (`describeRelationship()` in `lib/relationships.ts`) — no
+new data required. It's deliberately gender-neutral ("aunt/uncle",
+"niece/nephew") since gender isn't reliably recorded for everyone in the
+tree yet; if that ever changes, this is the one function to revisit.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no

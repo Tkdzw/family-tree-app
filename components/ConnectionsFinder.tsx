@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { FlatPerson, PersonRef, ConnectionResult } from "@/lib/relationships";
+import { describeRelationship } from "@/lib/relationships";
 import OrgChart, { type OrgNode } from "./OrgChart";
 
 function PersonPicker({
@@ -177,13 +178,27 @@ export default function ConnectionsFinder({ people, initialA }: { people: FlatPe
 
       {result && (
         <div className="mt-8 bg-panel border border-panelLine rounded-sm p-5">
-          {result.commonAncestor && result.path.length > 1 && (
-            <p className="text-boneDim text-sm mb-5">
-              Connected through <b className="text-gold">{result.commonAncestor.name}</b>
-              {result.generationsFromAToAncestor > 0 && result.generationsFromBToAncestor > 0 && (
-                <> — {result.generationsFromAToAncestor} generation{result.generationsFromAToAncestor !== 1 ? "s" : ""} up from Person A, {result.generationsFromBToAncestor} down to Person B.</>
+          {result.path.length > 1 ? (
+            <div className="mb-5 pb-5 border-b border-panelLine">
+              <p className="text-lg text-bone leading-snug">
+                {describeRelationship(
+                  result.path[0].person.name,
+                  result.path[result.path.length - 1].person.name,
+                  result.generationsFromAToAncestor,
+                  result.generationsFromBToAncestor
+                )}
+              </p>
+              {result.commonAncestor && (
+                <p className="text-boneDim text-sm mt-2">
+                  Connected through <b className="text-gold">{result.commonAncestor.name}</b>
+                  {result.generationsFromAToAncestor > 0 && result.generationsFromBToAncestor > 0 && (
+                    <> — {result.generationsFromAToAncestor} generation{result.generationsFromAToAncestor !== 1 ? "s" : ""} up from Person A, {result.generationsFromBToAncestor} down to Person B.</>
+                  )}
+                </p>
               )}
-            </p>
+            </div>
+          ) : (
+            <p className="text-boneDim text-sm mb-5">That's the same person.</p>
           )}
 
           {result.path.length > 1 && (
