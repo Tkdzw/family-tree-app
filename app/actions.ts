@@ -3,8 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/authz";
 
 export async function updatePersonDetails(formData: FormData) {
+  await requireAuth();
   const id = formData.get("id") as string;
   if (!id) return;
 
@@ -41,6 +43,7 @@ export async function updatePersonDetails(formData: FormData) {
  * - Unchecked, it just updates the placeholder guess without claiming it's verified.
  */
 export async function setChildMother(formData: FormData) {
+  await requireAuth();
   const childId = formData.get("childId") as string;
   const wifeId = formData.get("wifeId") as string;
   const verify = formData.get("verify") === "on";
@@ -69,6 +72,7 @@ export async function setChildMother(formData: FormData) {
 
 /** Removes a verified mother link, reverting the child back to unassigned/placeholder. */
 export async function clearVerifiedMother(formData: FormData) {
+  await requireAuth();
   const childId = formData.get("childId") as string;
   if (!childId) return;
 
@@ -86,6 +90,7 @@ export async function clearVerifiedMother(formData: FormData) {
 
 /** Creates a brand-new person as a child of the given parent. */
 export async function addChild(formData: FormData) {
+  await requireAuth();
   const parentId = formData.get("parentId") as string;
   const name = ((formData.get("name") as string) || "").trim();
   if (!parentId || !name) return;
@@ -103,6 +108,7 @@ export async function addChild(formData: FormData) {
 
 /** Creates a brand-new person as a spouse of the given person. */
 export async function addNewSpouse(formData: FormData) {
+  await requireAuth();
   const personId = formData.get("personId") as string;
   const name = ((formData.get("name") as string) || "").trim();
   if (!personId || !name) return;
@@ -125,6 +131,7 @@ export async function addNewSpouse(formData: FormData) {
  * for siblings that never had an explicit order set.
  */
 export async function reorderChild(formData: FormData) {
+  await requireAuth();
   const parentId = formData.get("parentId") as string;
   const childId = formData.get("childId") as string;
   const direction = formData.get("direction") as string; // "up" | "down"
@@ -167,6 +174,7 @@ export async function reorderChild(formData: FormData) {
 
 /** Links two already-existing people with a chosen relationship. */
 export async function linkExistingRelative(formData: FormData) {
+  await requireAuth();
   const personId = formData.get("personId") as string;
   const otherId = formData.get("otherId") as string;
   const relation = formData.get("relation") as string; // "parent" | "child" | "spouse"
@@ -198,6 +206,7 @@ export async function linkExistingRelative(formData: FormData) {
  * relationships resolve correctly.
  */
 export async function importBackup(formData: FormData) {
+  await requireAuth();
   const file = formData.get("file") as File | null;
   if (!file || file.size === 0) {
     redirect("/backup?error=" + encodeURIComponent("No file selected."));

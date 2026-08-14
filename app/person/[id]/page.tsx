@@ -4,6 +4,7 @@ import { getPersonProfile, getAllPeopleFlat } from "@/lib/relationships";
 import { getPatriarchView, getWives, getPatriarchId, findNodeInTree } from "@/lib/tree";
 import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse, reorderChild } from "@/app/actions";
 import RelativeLinker from "@/components/RelativeLinker";
+import { auth } from "@/auth";
 
 function NameLine({ p }: { p: { id: string; name: string; surname: string | null; deceased: boolean } }) {
   return (
@@ -21,7 +22,10 @@ export default async function PersonPage({ params }: { params: { id: string } })
 
   const { person, parents, children, siblingGroup, spouses, ancestorPath } = profile;
 
-  const allPeople = await getAllPeopleFlat();
+  const session = await auth();
+  const isAuthed = !!session?.user;
+
+  const allPeople = isAuthed ? await getAllPeopleFlat() : [];
 
   const patriarchId = await getPatriarchId();
   const isDirectChildOfPatriarch = patriarchId ? parents.some((p) => p.id === patriarchId) : false;
@@ -80,12 +84,14 @@ export default async function PersonPage({ params }: { params: { id: string } })
               <p className="text-sm text-bone">
                 <span className="text-gold">✓ Verified:</span> {wives.find((w) => w.id === motherId)?.name ?? "—"}
               </p>
-              <form action={clearVerifiedMother}>
-                <input type="hidden" name="childId" value={person.id} />
-                <button className="text-boneDim hover:text-rust text-xs font-mono underline">remove</button>
-              </form>
+              {isAuthed && (
+                <form action={clearVerifiedMother}>
+                  <input type="hidden" name="childId" value={person.id} />
+                  <button className="text-boneDim hover:text-rust text-xs font-mono underline">remove</button>
+                </form>
+              )}
             </div>
-          ) : (
+          ) : isAuthed ? (
             <>
               <p className="text-[13px] text-boneDim mb-3">
                 Currently a placeholder guess{motherId ? `: ${wives.find((w) => w.id === motherId)?.name}` : ""}.
@@ -116,42 +122,48 @@ export default async function PersonPage({ params }: { params: { id: string } })
                 </button>
               </form>
             </>
+          ) : (
+            <p className="text-[13px] text-boneDim">
+              Placeholder guess{motherId ? `: ${wives.find((w) => w.id === motherId)?.name}` : ""} — not yet confirmed.
+            </p>
           )}
         </div>
       )}
 
       {/* Editable fields */}
-      <details className="mb-8 group">
-        <summary className="cursor-pointer font-mono text-[10.5px] uppercase tracking-wide text-boneDim hover:text-gold select-none">
-          Edit details ▸
-        </summary>
-        <form action={updatePersonDetails} className="mt-4 bg-panel border border-panelLine rounded-sm p-4 space-y-3.5">
-          <input type="hidden" name="id" value={person.id} />
-          <div className="grid sm:grid-cols-2 gap-3.5">
-            <EditField label="First name(s)" name="firstName" defaultValue={person.name} />
-            <EditField label="Surname" name="surname" defaultValue={person.surname ?? ""} />
-            <EditField label="Gender" name="gender" defaultValue={person.gender ?? ""} placeholder="M / F" />
-            <EditField label="Totem" name="totem" defaultValue={person.totem ?? ""} />
-            <EditField label="Birth year" name="birthYear" defaultValue={person.birthYear?.toString() ?? ""} type="number" />
-            <EditField label="Birthplace" name="birthPlace" defaultValue={person.birthPlace ?? ""} />
-          </div>
-          <div className="flex gap-5">
-            <label className="flex items-center gap-1.5 text-xs text-boneDim">
-              <input type="checkbox" name="birthYearApprox" defaultChecked={person.birthYearApprox} className="accent-gold" />
-              Year is approximate
-            </label>
-            <label className="flex items-center gap-1.5 text-xs text-boneDim">
-              <input type="checkbox" name="deceased" defaultChecked={person.deceased} className="accent-gold" />
-              Deceased
-            </label>
-          </div>
-          <EditTextarea label="Notes" name="notes" defaultValue={person.notes ?? ""} />
-          <EditTextarea label="Source" name="sourceNote" defaultValue={person.sourceNote ?? ""} />
-          <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
-            Save changes
-          </button>
-        </form>
-      </details>
+      {isAuthed && (
+        <details className="mb-8 group">
+          <summary className="cursor-pointer font-mono text-[10.5px] uppercase tracking-wide text-boneDim hover:text-gold select-none">
+            Edit details ▸
+          </summary>
+          <form action={updatePersonDetails} className="mt-4 bg-panel border border-panelLine rounded-sm p-4 space-y-3.5">
+            <input type="hidden" name="id" value={person.id} />
+            <div className="grid sm:grid-cols-2 gap-3.5">
+              <EditField label="First name(s)" name="firstName" defaultValue={person.name} />
+              <EditField label="Surname" name="surname" defaultValue={person.surname ?? ""} />
+              <EditField label="Gender" name="gender" defaultValue={person.gender ?? ""} placeholder="M / F" />
+              <EditField label="Totem" name="totem" defaultValue={person.totem ?? ""} />
+              <EditField label="Birth year" name="birthYear" defaultValue={person.birthYear?.toString() ?? ""} type="number" />
+              <EditField label="Birthplace" name="birthPlace" defaultValue={person.birthPlace ?? ""} />
+            </div>
+            <div className="flex gap-5">
+              <label className="flex items-center gap-1.5 text-xs text-boneDim">
+                <input type="checkbox" name="birthYearApprox" defaultChecked={person.birthYearApprox} className="accent-gold" />
+                Year is approximate
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-boneDim">
+                <input type="checkbox" name="deceased" defaultChecked={person.deceased} className="accent-gold" />
+                Deceased
+              </label>
+            </div>
+            <EditTextarea label="Notes" name="notes" defaultValue={person.notes ?? ""} />
+            <EditTextarea label="Source" name="sourceNote" defaultValue={person.sourceNote ?? ""} />
+            <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
+              Save changes
+            </button>
+          </form>
+        </details>
+      )}
 
       <div className="grid sm:grid-cols-2 gap-x-8 gap-y-2 mb-8 text-sm">
         <Field label="Born" value={person.birthYear ? `${person.birthYearApprox ? "c. " : ""}${person.birthYear}` : null} />
@@ -168,65 +180,67 @@ export default async function PersonPage({ params }: { params: { id: string } })
 
       <RelationSection title="Parents" people={parents} empty="Not recorded yet." />
       <RelationSection title={`Spouses (${spouses.length})`} people={spouses} empty="None recorded." />
-      <SiblingOrderSection siblingGroup={siblingGroup} parentId={parents[0]?.id} />
-      <ChildrenSection children={children} parentId={person.id} />
+      <SiblingOrderSection siblingGroup={siblingGroup} parentId={parents[0]?.id} canEdit={isAuthed} />
+      <ChildrenSection children={children} parentId={person.id} canEdit={isAuthed} />
 
       {/* Add / link relatives */}
-      <details className="mb-8 group">
-        <summary className="cursor-pointer font-mono text-[10.5px] uppercase tracking-wide text-boneDim hover:text-gold select-none">
-          Add or link a relative ▸
-        </summary>
-        <div className="mt-4 space-y-5">
-          <div className="bg-panel border border-panelLine rounded-sm p-4">
-            <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">Add a new child</div>
-            <form action={addChild} className="flex flex-wrap items-center gap-2.5">
-              <input type="hidden" name="parentId" value={person.id} />
-              <input
-                name="name"
-                required
-                placeholder="Full name"
-                className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim w-48"
-              />
-              <select name="gender" defaultValue="" className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-2.5 py-2 outline-none focus:border-goldDim">
-                <option value="">Gender…</option>
-                <option value="M">M</option>
-                <option value="F">F</option>
-              </select>
-              <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
-                Add child
-              </button>
-            </form>
-          </div>
-
-          <div className="bg-panel border border-panelLine rounded-sm p-4">
-            <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">Add a new spouse</div>
-            <form action={addNewSpouse} className="flex flex-wrap items-center gap-2.5">
-              <input type="hidden" name="personId" value={person.id} />
-              <input
-                name="name"
-                required
-                placeholder="Full name"
-                className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim w-48"
-              />
-              <select name="gender" defaultValue="" className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-2.5 py-2 outline-none focus:border-goldDim">
-                <option value="">Gender…</option>
-                <option value="M">M</option>
-                <option value="F">F</option>
-              </select>
-              <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
-                Add spouse
-              </button>
-            </form>
-          </div>
-
-          <div className="bg-panel border border-panelLine rounded-sm p-4">
-            <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">
-              Link an existing person
+      {isAuthed && (
+        <details className="mb-8 group">
+          <summary className="cursor-pointer font-mono text-[10.5px] uppercase tracking-wide text-boneDim hover:text-gold select-none">
+            Add or link a relative ▸
+          </summary>
+          <div className="mt-4 space-y-5">
+            <div className="bg-panel border border-panelLine rounded-sm p-4">
+              <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">Add a new child</div>
+              <form action={addChild} className="flex flex-wrap items-center gap-2.5">
+                <input type="hidden" name="parentId" value={person.id} />
+                <input
+                  name="name"
+                  required
+                  placeholder="Full name"
+                  className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim w-48"
+                />
+                <select name="gender" defaultValue="" className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-2.5 py-2 outline-none focus:border-goldDim">
+                  <option value="">Gender…</option>
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                </select>
+                <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                  Add child
+                </button>
+              </form>
             </div>
-            <RelativeLinker personId={person.id} allPeople={allPeople} />
+
+            <div className="bg-panel border border-panelLine rounded-sm p-4">
+              <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">Add a new spouse</div>
+              <form action={addNewSpouse} className="flex flex-wrap items-center gap-2.5">
+                <input type="hidden" name="personId" value={person.id} />
+                <input
+                  name="name"
+                  required
+                  placeholder="Full name"
+                  className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim w-48"
+                />
+                <select name="gender" defaultValue="" className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-2.5 py-2 outline-none focus:border-goldDim">
+                  <option value="">Gender…</option>
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                </select>
+                <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                  Add spouse
+                </button>
+              </form>
+            </div>
+
+            <div className="bg-panel border border-panelLine rounded-sm p-4">
+              <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">
+                Link an existing person
+              </div>
+              <RelativeLinker personId={person.id} allPeople={allPeople} />
+            </div>
           </div>
-        </div>
-      </details>
+        </details>
+      )}
 
       <div className="mt-2 pt-6 border-t border-panelLine flex flex-wrap gap-3">
         <Link
@@ -359,9 +373,11 @@ function ReorderButtons({ parentId, childId, disableUp, disableDown }: { parentI
 function SiblingOrderSection({
   siblingGroup,
   parentId,
+  canEdit,
 }: {
   siblingGroup: { id: string; name: string; surname: string | null; deceased: boolean; birthOrder: number | null; isSelf: boolean; position: number }[];
   parentId?: string;
+  canEdit: boolean;
 }) {
   const othersCount = siblingGroup.length - 1;
   return (
@@ -391,7 +407,7 @@ function SiblingOrderSection({
               ) : (
                 <NameLine p={s} />
               )}
-              {parentId && (
+              {canEdit && parentId && (
                 <ReorderButtons
                   parentId={parentId}
                   childId={s.id}
@@ -407,13 +423,15 @@ function SiblingOrderSection({
   );
 }
 
-/** This person's children, in birth order, with up/down controls to reorder. */
+/** This person's children, in birth order, with up/down controls to reorder (editors only). */
 function ChildrenSection({
   children,
   parentId,
+  canEdit,
 }: {
   children: { id: string; name: string; surname: string | null; deceased: boolean }[];
   parentId: string;
+  canEdit: boolean;
 }) {
   return (
     <div className="mb-7">
@@ -428,7 +446,9 @@ function ChildrenSection({
             <li key={c.id} className="flex items-center gap-2.5 text-[15px]">
               <span className="font-mono text-[10px] text-boneDim w-5 flex-none text-right">{i + 1}.</span>
               <NameLine p={c} />
-              <ReorderButtons parentId={parentId} childId={c.id} disableUp={i === 0} disableDown={i === children.length - 1} />
+              {canEdit && (
+                <ReorderButtons parentId={parentId} childId={c.id} disableUp={i === 0} disableDown={i === children.length - 1} />
+              )}
             </li>
           ))}
         </ol>
