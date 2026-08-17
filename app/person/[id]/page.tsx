@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPersonProfile, getAllPeopleFlat } from "@/lib/relationships";
+import { getPersonProfile, getAllPeopleFlat, getUnlinkedChildrenForSpouse } from "@/lib/relationships";
 import { getPatriarchView, getWives, getPatriarchId, findNodeInTree } from "@/lib/tree";
-import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse, reorderChild } from "@/app/actions";
+import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse, reorderChild, bulkLinkChildrenToSpouse } from "@/app/actions";
 import RelativeLinker from "@/components/RelativeLinker";
 import { auth } from "@/auth";
 
@@ -26,6 +26,14 @@ export default async function PersonPage({ params }: { params: { id: string } })
   const isAuthed = !!session?.user;
 
   const allPeople = isAuthed ? await getAllPeopleFlat() : [];
+
+  // for the bulk "link children to this spouse" tool: for each spouse, which
+  // of this person's own children aren't linked to that spouse yet
+  const unlinkedBySpouse = isAuthed
+    ? await Promise.all(
+        spouses.map(async (s) => ({ spouse: s, unlinked: await getUnlinkedChildrenForSpouse(person.id, s.id) }))
+      )
+    : [];
 
   const patriarchId = await getPatriarchId();
   const isDirectChildOfPatriarch = patriarchId ? parents.some((p) => p.id === patriarchId) : false;
@@ -235,6 +243,42 @@ export default async function PersonPage({ params }: { params: { id: string } })
               </div>
               <RelativeLinker personId={person.id} allPeople={allPeople} />
             </div>
+
+            {unlinkedBySpouse.some((s) => s.unlinked.length > 0) && (
+              <div className="bg-panel border border-panelLine rounded-sm p-4">
+                <div className="font-mono text-[10px] uppercase tracking-wide text-boneDim mb-2.5">
+                  Link existing children to a spouse
+                </div>
+                <p className="text-[13px] text-boneDim mb-3">
+                  Check which of {person.name}'s children belong to each spouse, then save — quicker
+                  than confirming them one at a time from each child's own page.
+                </p>
+                <div className="space-y-4">
+                  {unlinkedBySpouse
+                    .filter((s) => s.unlinked.length > 0)
+                    .map(({ spouse, unlinked }) => (
+                      <form key={spouse.id} action={bulkLinkChildrenToSpouse} className="border-t border-panelLine pt-3 first:border-t-0 first:pt-0">
+                        <input type="hidden" name="spouseId" value={spouse.id} />
+                        <div className="text-sm text-bone mb-2">
+                          Children of <NameLine p={spouse} />:
+                        </div>
+                        <div className="space-y-1.5 mb-3">
+                          {unlinked.map((c) => (
+                            <label key={c.id} className="flex items-center gap-2 text-sm text-boneDim">
+                              <input type="checkbox" name="childIds" value={c.id} className="accent-gold" />
+                              {c.name}
+                              {c.surname ? ` ${c.surname}` : ""}
+                            </label>
+                          ))}
+                        </div>
+                        <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                          Link selected to {spouse.name}
+                        </button>
+                      </form>
+                    ))}
+                </div>
+              </div>
+            )}
           </div>
         </details>
       )}
