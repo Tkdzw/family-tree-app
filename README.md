@@ -290,6 +290,29 @@ action directly — the real enforcement has to live in the action itself,
 which is what `requireAuth()` does. If you ever add a new mutating action,
 make sure it calls `requireAuth()` first too.
 
+## Bug fix: "Link an existing person" had parent/child backwards
+
+`linkExistingRelative` had the two relationship branches swapped —
+selecting "is the parent of" on someone's profile was actually recording
+*them* as the child of the person you picked, the exact opposite of the
+dropdown label. Fixed: `personId` (whoever's profile you're on) is now
+correctly the parent when you choose "is the parent of," and correctly the
+child when you choose "is the child of."
+
+## New: bulk-link a spouse's children
+
+The better fix for "link a wife to the children she already has with the
+father" wasn't just correcting that bug — doing it one child at a time via
+each child's own "Mother (wife)" box is tedious once there are several. On
+the **father's own profile page**, under "Add or link a relative," there's
+now a **"Link existing children to a spouse"** panel: for each spouse, a
+checklist of his children who aren't linked to her yet, check the ones that
+are hers, hit save. This creates real, confirmed `ParentChild` links
+directly (`bulkLinkChildrenToSpouse` in `app/actions.ts`) — it also clears
+any leftover placeholder wife-guess on those children and removes any other
+female parent already recorded for them first, so nobody ends up with two
+confirmed mothers.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no

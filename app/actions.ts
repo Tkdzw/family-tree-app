@@ -180,13 +180,15 @@ export async function linkExistingRelative(formData: FormData) {
   const relation = formData.get("relation") as string; // "parent" | "child" | "spouse"
   if (!personId || !otherId || personId === otherId) return;
 
+  // relation describes personId's role relative to otherId, matching the
+  // dropdown label ("is the parent of" -> personId is the parent).
   if (relation === "parent") {
     await prisma.parentChild.create({
-      data: { parentId: otherId, childId: personId, relType: "biological" },
+      data: { parentId: personId, childId: otherId, relType: "biological" },
     });
   } else if (relation === "child") {
     await prisma.parentChild.create({
-      data: { parentId: personId, childId: otherId, relType: "biological" },
+      data: { parentId: otherId, childId: personId, relType: "biological" },
     });
   } else if (relation === "spouse") {
     await prisma.union.create({
@@ -197,6 +199,46 @@ export async function linkExistingRelative(formData: FormData) {
   revalidatePath("/");
   revalidatePath(`/person/${personId}`);
   revalidatePath(`/person/${otherId}`);
+}
+
+/**
+ * Links multiple existing children to a spouse at once — e.g. once a wife
+ * is on file, assign several of her husband's already-recorded children to
+ * her as mother in one go instead of doing it one at a time. Any existing
+ * female parent already recorded for a selected child is removed first (a
+ * child shouldn't end up with two different confirmed mothers), and if the
+ * child had a placeholder wife guess, it's cleared since a real link now
+ * supersedes it.
+ */
+export async function bulkLinkChildrenToSpouse(formData: FormData) {
+  await requireAuth();
+
+  const spouseId = formData.get("spouseId") as string;
+  const childIds = formData.getAll("childIds") as string[];
+  if (!spouseId || childIds.length === 0) return;
+
+  const spouse = await prisma.person.findUnique({ where: { id: spouseId } });
+  if (!spouse) return;
+
+  for (const childId of childIds) {
+    if (spouse.gender === "F") {
+      const existingParentLinks = await prisma.parentChild.findMany({ where: { childId } });
+      for (const link of existingParentLinks) {
+        const parent = await prisma.person.findUnique({ where: { id: link.parentId } });
+        if (parent?.gender === "F") {
+          await prisma.parentChild.delete({ where: { id: link.id } });
+        }
+      }
+    }
+    await prisma.parentChild.create({
+      data: { parentId: spouseId, childId, relType: "biological" },
+    });
+    await prisma.person.update({ where: { id: childId }, data: { placeholderMotherId: null } });
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/person/${spouseId}`);
+  for (const childId of childIds) revalidatePath(`/person/${childId}`);
 }
 
 /**

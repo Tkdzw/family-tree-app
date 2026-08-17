@@ -176,6 +176,15 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
 
 export type FlatPerson = PersonRef & { breadcrumb: string };
 
+/** Children of `personId` who do NOT already have `spouseId` recorded as one of their parents — used to power the bulk "link children to this spouse" tool. */
+export async function getUnlinkedChildrenForSpouse(personId: string, spouseId: string): Promise<PersonRef[]> {
+  const g = await loadGraph();
+  const childIds = g.childrenOf.get(personId) ?? [];
+  return childIds
+    .filter((cid) => !(g.parentsOf.get(cid) ?? []).includes(spouseId))
+    .map((cid) => toRef(g, cid));
+}
+
 /** Every person in the tree, flattened, with a readable breadcrumb path from the root. Used for search/select UI. */
 export async function getAllPeopleFlat(): Promise<FlatPerson[]> {
   const g = await loadGraph();
