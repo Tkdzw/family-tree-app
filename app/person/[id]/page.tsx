@@ -20,7 +20,7 @@ export default async function PersonPage({ params }: { params: { id: string } })
   const profile = await getPersonProfile(params.id);
   if (!profile) notFound();
 
-  const { person, parents, children, siblingGroup, spouses, ancestorPath } = profile;
+  const { person, parents, grandparents, greatGrandparents, children, siblingGroup, spouses, ancestorPath } = profile;
 
   const session = await auth();
   const isAuthed = !!session?.user;
@@ -75,93 +75,88 @@ export default async function PersonPage({ params }: { params: { id: string } })
         {person.deceased ? " · deceased" : ""}
       </p>
 
-      {/* Mother / wife verification */}
-      {isDirectChildOfPatriarch && wives.length > 0 && (
-        <div className="mb-8 bg-panel border border-panelLine rounded-sm p-4">
-          <div className="font-mono text-[10.5px] uppercase tracking-wide text-boneDim mb-3">Mother (wife)</div>
-          {motherVerified ? (
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-bone">
-                <span className="text-gold">✓ Verified:</span> {wives.find((w) => w.id === motherId)?.name ?? "—"}
-              </p>
-              {isAuthed && (
-                <form action={clearVerifiedMother}>
-                  <input type="hidden" name="childId" value={person.id} />
-                  <button className="text-boneDim hover:text-rust text-xs font-mono underline">remove</button>
-                </form>
-              )}
-            </div>
-          ) : isAuthed ? (
-            <>
-              <p className="text-[13px] text-boneDim mb-3">
-                Currently a placeholder guess{motherId ? `: ${wives.find((w) => w.id === motherId)?.name}` : ""}.
-                Change it and check the box below once it's confirmed with a family elder.
-              </p>
-              <form action={setChildMother} className="flex flex-wrap items-center gap-3">
-                <input type="hidden" name="childId" value={person.id} />
-                <select
-                  name="wifeId"
-                  defaultValue={motherId ?? ""}
-                  className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim"
-                >
-                  <option value="" disabled>
-                    Choose a wife…
-                  </option>
-                  {wives.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.name}
-                    </option>
-                  ))}
-                </select>
-                <label className="flex items-center gap-1.5 text-xs text-boneDim">
-                  <input type="checkbox" name="verify" className="accent-gold" />
-                  Confirmed — lock this in
-                </label>
-                <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
-                  Save
-                </button>
-              </form>
-            </>
-          ) : (
-            <p className="text-[13px] text-boneDim">
-              Placeholder guess{motherId ? `: ${wives.find((w) => w.id === motherId)?.name}` : ""} — not yet confirmed.
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Editable fields */}
+      {/* Editable fields — mother/wife verification lives in here too, since it's an editorial control */}
       {isAuthed && (
         <details className="mb-8 group">
           <summary className="cursor-pointer font-mono text-[10.5px] uppercase tracking-wide text-boneDim hover:text-gold select-none">
             Edit details ▸
           </summary>
-          <form action={updatePersonDetails} className="mt-4 bg-panel border border-panelLine rounded-sm p-4 space-y-3.5">
-            <input type="hidden" name="id" value={person.id} />
-            <div className="grid sm:grid-cols-2 gap-3.5">
-              <EditField label="First name(s)" name="firstName" defaultValue={person.name} />
-              <EditField label="Surname" name="surname" defaultValue={person.surname ?? ""} />
-              <EditField label="Gender" name="gender" defaultValue={person.gender ?? ""} placeholder="M / F" />
-              <EditField label="Totem" name="totem" defaultValue={person.totem ?? ""} />
-              <EditField label="Birth year" name="birthYear" defaultValue={person.birthYear?.toString() ?? ""} type="number" />
-              <EditField label="Birthplace" name="birthPlace" defaultValue={person.birthPlace ?? ""} />
-            </div>
-            <div className="flex gap-5">
-              <label className="flex items-center gap-1.5 text-xs text-boneDim">
-                <input type="checkbox" name="birthYearApprox" defaultChecked={person.birthYearApprox} className="accent-gold" />
-                Year is approximate
-              </label>
-              <label className="flex items-center gap-1.5 text-xs text-boneDim">
-                <input type="checkbox" name="deceased" defaultChecked={person.deceased} className="accent-gold" />
-                Deceased
-              </label>
-            </div>
-            <EditTextarea label="Notes" name="notes" defaultValue={person.notes ?? ""} />
-            <EditTextarea label="Source" name="sourceNote" defaultValue={person.sourceNote ?? ""} />
-            <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
-              Save changes
-            </button>
-          </form>
+          <div className="mt-4 space-y-5">
+            {isDirectChildOfPatriarch && wives.length > 0 && (
+              <div className="bg-panel border border-panelLine rounded-sm p-4">
+                <div className="font-mono text-[10.5px] uppercase tracking-wide text-boneDim mb-3">Mother (wife)</div>
+                {motherVerified ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-bone">
+                      <span className="text-gold">✓ Verified:</span> {wives.find((w) => w.id === motherId)?.name ?? "—"}
+                    </p>
+                    <form action={clearVerifiedMother}>
+                      <input type="hidden" name="childId" value={person.id} />
+                      <button className="text-boneDim hover:text-rust text-xs font-mono underline">remove</button>
+                    </form>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-[13px] text-boneDim mb-3">
+                      Currently a placeholder guess{motherId ? `: ${wives.find((w) => w.id === motherId)?.name}` : ""}.
+                      Change it and check the box below once it's confirmed with a family elder.
+                    </p>
+                    <form action={setChildMother} className="flex flex-wrap items-center gap-3">
+                      <input type="hidden" name="childId" value={person.id} />
+                      <select
+                        name="wifeId"
+                        defaultValue={motherId ?? ""}
+                        className="bg-bg border border-panelLine text-bone text-sm rounded-sm px-3 py-2 outline-none focus:border-goldDim"
+                      >
+                        <option value="" disabled>
+                          Choose a wife…
+                        </option>
+                        {wives.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            {w.name}
+                          </option>
+                        ))}
+                      </select>
+                      <label className="flex items-center gap-1.5 text-xs text-boneDim">
+                        <input type="checkbox" name="verify" className="accent-gold" />
+                        Confirmed — lock this in
+                      </label>
+                      <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                        Save
+                      </button>
+                    </form>
+                  </>
+                )}
+              </div>
+            )}
+
+            <form action={updatePersonDetails} className="bg-panel border border-panelLine rounded-sm p-4 space-y-3.5">
+              <input type="hidden" name="id" value={person.id} />
+              <div className="grid sm:grid-cols-2 gap-3.5">
+                <EditField label="First name(s)" name="firstName" defaultValue={person.name} />
+                <EditField label="Surname" name="surname" defaultValue={person.surname ?? ""} />
+                <EditField label="Gender" name="gender" defaultValue={person.gender ?? ""} placeholder="M / F" />
+                <EditField label="Totem" name="totem" defaultValue={person.totem ?? ""} />
+                <EditField label="Birth year" name="birthYear" defaultValue={person.birthYear?.toString() ?? ""} type="number" />
+                <EditField label="Birthplace" name="birthPlace" defaultValue={person.birthPlace ?? ""} />
+              </div>
+              <div className="flex gap-5">
+                <label className="flex items-center gap-1.5 text-xs text-boneDim">
+                  <input type="checkbox" name="birthYearApprox" defaultChecked={person.birthYearApprox} className="accent-gold" />
+                  Year is approximate
+                </label>
+                <label className="flex items-center gap-1.5 text-xs text-boneDim">
+                  <input type="checkbox" name="deceased" defaultChecked={person.deceased} className="accent-gold" />
+                  Deceased
+                </label>
+              </div>
+              <EditTextarea label="Notes" name="notes" defaultValue={person.notes ?? ""} />
+              <EditTextarea label="Source" name="sourceNote" defaultValue={person.sourceNote ?? ""} />
+              <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
+                Save changes
+              </button>
+            </form>
+          </div>
         </details>
       )}
 
@@ -179,6 +174,8 @@ export default async function PersonPage({ params }: { params: { id: string } })
       )}
 
       <RelationSection title="Parents" people={parents} empty="Not recorded yet." />
+      <RelationSection title="Grandparents" people={grandparents} empty="Not recorded yet." />
+      <RelationSection title="Great-grandparents" people={greatGrandparents} empty="Not recorded yet." />
       <RelationSection title={`Spouses (${spouses.length})`} people={spouses} empty="None recorded." />
       <SiblingOrderSection siblingGroup={siblingGroup} parentId={parents[0]?.id} canEdit={isAuthed} />
       <ChildrenSection children={children} parentId={person.id} canEdit={isAuthed} />

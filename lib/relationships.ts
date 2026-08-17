@@ -102,6 +102,8 @@ export type SiblingEntry = PersonRef & { birthOrder: number | null; isSelf: bool
 export type PersonProfile = {
   person: PersonRef & { totem: string | null; birthYear: number | null; birthYearApprox: boolean; birthPlace: string | null; notes: string | null; sourceNote: string | null; gender: string | null; birthOrder: number | null };
   parents: PersonRef[];
+  grandparents: PersonRef[];
+  greatGrandparents: PersonRef[];
   children: PersonRef[];
   siblingGroup: SiblingEntry[]; // full sibling set INCLUDING self, ordered by birth position
   spouses: PersonRef[];
@@ -115,6 +117,17 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
 
   const parentIds = g.parentsOf.get(id) ?? [];
   const childIds = g.childrenOf.get(id) ?? [];
+
+  // grandparents: every recorded parent of each of this person's parents
+  // (covers both parent lines once a mother is verified, not just one chain)
+  const grandparentIds = new Set<string>();
+  for (const parentId of parentIds) {
+    for (const gpId of g.parentsOf.get(parentId) ?? []) grandparentIds.add(gpId);
+  }
+  const greatGrandparentIds = new Set<string>();
+  for (const gpId of grandparentIds) {
+    for (const ggpId of g.parentsOf.get(gpId) ?? []) greatGrandparentIds.add(ggpId);
+  }
 
   // full sibling group (everyone who shares at least one parent with this
   // person, including the person themself), ordered by birth position
@@ -152,6 +165,8 @@ export async function getPersonProfile(id: string): Promise<PersonProfile | null
   return {
     person: p,
     parents: parentIds.map((pid) => toRef(g, pid)),
+    grandparents: [...grandparentIds].map((gpId) => toRef(g, gpId)),
+    greatGrandparents: [...greatGrandparentIds].map((ggpId) => toRef(g, ggpId)),
     children: childIds.map((cid) => toRef(g, cid)),
     siblingGroup,
     spouses: spouseIds.map((sid) => toRef(g, sid)),
