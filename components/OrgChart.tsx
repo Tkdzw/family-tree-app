@@ -9,8 +9,9 @@ export type OrgNode = {
   label: string;
   deceased?: boolean;
   branch?: string | null;
-  tag?: string; // small label under the name, e.g. "unverified" or "7 wives"
+  tag?: string; // small label under the name, e.g. "unverified" or "no children linked"
   tagTone?: "warning" | "info"; // "warning" (rust, default) for data-quality flags, "info" (gold) for neutral labels like "Person A"
+  isSpouse?: boolean; // married in, not a blood descendant — rendered in a distinct color so it never reads as "another generation"
   children: OrgNode[];
 };
 
@@ -37,7 +38,7 @@ function OrgNodeItem({ node, depth, query, expandAll }: { node: OrgNode; depth: 
   const descendantHighlighted = highlight ? node.children.some((c) => nodeOrDescendantHighlighted(c, highlight)) : false;
   const dimmed = highlight !== null && !onHighlightPath && !descendantHighlighted;
 
-  // default open depth: patriarch(0), wife tier(1), children(2) visible; deeper collapses.
+  // default open depth: patriarch(0), spouse tier(1), children(2) visible; deeper collapses.
   // expandAll skips the depth cutoff entirely — used for small trees like a single connection path.
   const defaultOpen = expandAll || depth < 2 || selfTextMatch || descendantTextMatch || onHighlightPath || descendantHighlighted;
   const [open, setOpen] = useState(defaultOpen);
@@ -46,15 +47,29 @@ function OrgNodeItem({ node, depth, query, expandAll }: { node: OrgNode; depth: 
 
   const showChildren = hasChildren && (open || descendantTextMatch || descendantHighlighted);
 
+  const activeAccent = node.isSpouse ? "border-spouse" : "border-gold";
+  const activeText = node.isSpouse ? "text-spouse" : "text-gold";
+
   return (
     <li>
       <div
         onClick={() => hasChildren && setOpen((o) => !o)}
-        className={`inline-flex flex-col items-center gap-0.5 bg-panel border rounded-sm px-3.5 py-2.5 min-w-[110px] max-w-[170px] transition-all ${
+        className={`inline-flex flex-col items-center gap-0.5 rounded-sm px-3.5 py-2.5 min-w-[110px] max-w-[170px] transition-all border ${
           hasChildren ? "cursor-pointer" : ""
-        } ${selfTextMatch || onHighlightPath ? "border-gold" : "border-panelLine"} ${dimmed ? "opacity-30" : ""}`}
+        } ${
+          node.isSpouse
+            ? "bg-spouse/[0.07] border-dashed"
+            : "bg-panel"
+        } ${selfTextMatch || onHighlightPath ? activeAccent : node.isSpouse ? "border-spouse/50" : "border-panelLine"} ${
+          dimmed ? "opacity-30" : ""
+        }`}
       >
-        <span className={`font-display text-[13.5px] leading-tight text-center ${selfTextMatch || onHighlightPath ? "text-gold" : "text-bone"}`}>
+        <span
+          className={`font-display text-[13.5px] leading-tight text-center flex items-center gap-1 ${
+            selfTextMatch || onHighlightPath ? activeText : node.isSpouse ? "text-spouse" : "text-bone"
+          }`}
+        >
+          {node.isSpouse && <span className="text-[11px] opacity-80">⚭</span>}
           {node.deceased && <span className="text-rust mr-0.5">†</span>}
           <Link href={`/person/${node.id}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
             {node.label}

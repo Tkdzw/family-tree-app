@@ -313,6 +313,32 @@ any leftover placeholder wife-guess on those children and removes any other
 female parent already recorded for them first, so nobody ends up with two
 confirmed mothers.
 
+## Spouses are now generalized, visually distinct, and toggleable
+
+Previously the "spouse tier" on the org chart was hard-coded for the
+patriarch's 7 wives specifically. It's now a general rule: **any** person
+anywhere in the tree who has a recorded spouse (a real `Union` row) gets
+that same tier automatically — so if you add a wife or husband for someone
+several generations down, they'll show up on the chart exactly the same
+way, with no extra work. Children get attributed to whichever spouse is
+actually linked to them (`bulkLinkChildrenToSpouse`, `setChildMother`, or a
+direct link all count); anyone not yet linked to a specific spouse sits in
+an "Unassigned" bucket next to the spouse tier rather than disappearing.
+
+**Visual distinction:** married-in people now render in a dusty blue accent
+(`spouse` in `tailwind.config.ts`) with a dashed border and a ⚭ mark next to
+their name, instead of the gold used for blood descendants — so a chart
+with several marriages in it stays readable at a glance instead of every
+box looking the same.
+
+**Toggle, persisted as a cookie:** a switch next to the stats row
+("⚭ Spouses shown" / "Spouses hidden") hides the entire spouse tier when
+off — children reattach directly to their parent, same as anyone with no
+recorded spouse. The preference is written to a `showSpouses` cookie
+client-side and read server-side in `app/page.tsx` via `cookies()`, so it's
+already correct on first paint next time you load the page — no flash of
+the wrong state.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no
