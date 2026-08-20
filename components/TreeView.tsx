@@ -1,21 +1,94 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { TreeNode, WifeGroup } from "@/lib/tree";
+import type { TreeNode } from "@/lib/tree";
 import { nodeMatches } from "./PersonNode";
 import { HighlightContext } from "./highlight-context";
 import OrgChart, { type OrgNode } from "./OrgChart";
 
 type FlatPick = { id: string; name: string; surname: string | null };
 
-function toOrgNode(node: TreeNode): OrgNode {
+const SHOW_SPOUSES_COOKIE = "showSpouses";
+
+function setShowSpousesCookie(value: boolean) {
+  document.cookie = `${SHOW_SPOUSES_COOKIE}=${value ? "1" : "0"}; path=/; max-age=31536000; samesite=lax`;
+}
+
+/**
+ * Builds the organogram recursively: whenever a person has recorded
+ * spouse(s) (a real Union row — at ANY level, not just the patriarch), they
+ * render as a distinct tier between that person and their children, each
+ * spouse attributed whichever of the children are actually recorded as
+ * theirs too. Children with no matching spouse link sit in an "Unassigned"
+ * bucket alongside the spouse tier, so nothing silently disappears.
+ *
+ * When showSpouses is off, this is skipped entirely and children attach
+ * straight to their parent, same as someone with no recorded spouse at all.
+ */
+function personToOrgNode(node: TreeNode, showSpouses: boolean, isSpouseNode = false): OrgNode {
+  if (!showSpouses || node.spouses.length === 0) {
+    return {
+      id: node.id,
+      label: node.name,
+      deceased: node.deceased,
+      branch: node.branch,
+      isSpouse: isSpouseNode,
+      children: node.children.map((c) => personToOrgNode(c, showSpouses)),
+    };
+  }
+
+  const spouseIds = node.spouses.map((s) => s.id);
+  const isAttributedToASpouse = (c: TreeNode) => (c.motherId != null && spouseIds.includes(c.motherId)) || c.parentIds.some((pid) => spouseIds.includes(pid));
+  const unassigned = node.children.filter((c) => !isAttributedToASpouse(c));
+
+  const spouseTierNodes: OrgNode[] = node.spouses.map((sp) => {
+    const attributed = node.children.filter((c) => c.motherId === sp.id || c.parentIds.includes(sp.id));
+    return {
+      id: sp.id,
+      label: sp.name,
+      isSpouse: true,
+      tag: /^wife /i.test(sp.name) ? "name placeholder" : attributed.length === 0 ? "no children linked" : undefined,
+      children: attributed.map((c) => personToOrgNode(c, showSpouses)),
+    };
+  });
+
+  const unassignedNode: OrgNode[] =
+    unassigned.length > 0
+      ? [{ id: `${node.id}-unassigned`, label: "Unassigned", tag: "no spouse linked", children: unassigned.map((c) => personToOrgNode(c, showSpouses)) }]
+      : [];
+
   return {
     id: node.id,
     label: node.name,
     deceased: node.deceased,
     branch: node.branch,
-    children: node.children.map(toOrgNode),
+    isSpouse: isSpouseNode,
+    children: [...spouseTierNodes, ...unassignedNode],
   };
+}
+
+function SpouseToggle({ show, onChange }: { show: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      onClick={() => {
+        onChange(!show);
+        setShowSpousesCookie(!show);
+      }}
+      className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-spouse"
+      title={show ? "Hide spouses on the chart" : "Show spouses on the chart"}
+    >
+      <span
+        className={`w-8 h-4 rounded-full relative transition-colors ${show ? "bg-spouse/40" : "bg-panelLine"}`}
+      >
+        <span
+          className={`absolute top-0.5 w-3 h-3 rounded-full bg-bone transition-all ${show ? "left-4" : "left-0.5"}`}
+        />
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="text-[11px]">⚭</span> {show ? "Spouses shown" : "Spouses hidden"}
+      </span>
+    </button>
+  );
 }
 
 function FindMeBox({
@@ -84,20 +157,19 @@ function FindMeBox({
 export default function TreeView({
   lineage,
   patriarch,
-  wifeGroups,
-  unassignedChildren,
   stats,
   initialMeId,
+  initialShowSpouses,
 }: {
   lineage: { id: string; name: string }[];
   patriarch: TreeNode;
-  wifeGroups: WifeGroup[];
-  unassignedChildren: TreeNode[];
   stats: { totalPeople: number; branchCount: number; descendantCount: number; wifeCount: number; maxDepth: number; verifiedMotherCount: number };
   initialMeId?: string;
+  initialShowSpouses: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [meId, setMeId] = useState(initialMeId ?? "");
+  const [showSpouses, setShowSpouses] = useState(initialShowSpouses);
 
   // flatten the whole patriarch subtree once: id -> parentId, and a plain
   // list for the "find me" search box
@@ -141,27 +213,7 @@ export default function TreeView({
     return patriarch.children.some((c) => nodeMatches(c, query) || c.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, patriarch]);
 
-  // Build the organogram: patriarch -> wife tier -> children -> (recursively) grandchildren etc.
-  // Wife tier is the one place we have real spouse data; everyone below just
-  // falls through to "children directly below" since no deeper spouse data exists yet.
-  const orgRoot: OrgNode = useMemo(() => {
-    const wifeNodes: OrgNode[] = wifeGroups.map((g) => ({
-      id: g.wife.id,
-      label: g.wife.name,
-      tag: /^wife /i.test(g.wife.name) ? "name placeholder" : undefined,
-      children: g.children.map(toOrgNode),
-    }));
-    const unassignedNode: OrgNode[] =
-      unassignedChildren.length > 0
-        ? [{ id: "unassigned", label: "Unassigned", tag: "no wife linked", children: unassignedChildren.map(toOrgNode) }]
-        : [];
-
-    if (wifeNodes.length === 0 && unassignedNode.length === 0) {
-      // no spouses at all — children sit directly below the patriarch
-      return { id: patriarch.id, label: patriarch.name, children: patriarch.children.map(toOrgNode) };
-    }
-    return { id: patriarch.id, label: patriarch.name, children: [...wifeNodes, ...unassignedNode] };
-  }, [patriarch, wifeGroups, unassignedChildren]);
+  const orgRoot: OrgNode = useMemo(() => personToOrgNode(patriarch, showSpouses), [patriarch, showSpouses]);
 
   return (
     <HighlightContext.Provider value={highlightSet}>
@@ -179,12 +231,19 @@ export default function TreeView({
             The <b className="text-bone font-semibold">Chiwashira–Ziwenga</b> family tree, read live from
             the database, laid out as an organogram — {patriarch.name}, his wives, and their descendants.
           </p>
-          <FindMeBox allPeople={flatList} meId={meId} onPick={setMeId} onClear={() => setMeId("")} />
-          <div className="flex flex-wrap border-t border-panelLine mt-6">
-            <Stat n={stats.branchCount} l="Children" />
-            <Stat n={stats.wifeCount} l="Wives recorded" />
-            <Stat n={stats.descendantCount} l="Descendants total" />
-            <Stat n={stats.verifiedMotherCount} l="Mothers confirmed" />
+          <div className="flex flex-wrap items-center gap-4">
+            <FindMeBox allPeople={flatList} meId={meId} onPick={setMeId} onClear={() => setMeId("")} />
+          </div>
+          <div className="flex flex-wrap items-center justify-between border-t border-panelLine mt-6 pt-1">
+            <div className="flex flex-wrap">
+              <Stat n={stats.branchCount} l="Children" />
+              <Stat n={stats.wifeCount} l="Wives recorded" />
+              <Stat n={stats.descendantCount} l="Descendants total" />
+              <Stat n={stats.verifiedMotherCount} l="Mothers confirmed" />
+            </div>
+            <div className="pt-4">
+              <SpouseToggle show={showSpouses} onChange={setShowSpouses} />
+            </div>
           </div>
         </div>
 
@@ -221,7 +280,7 @@ export default function TreeView({
         <div className="bg-rust/[0.07] border border-rust/30 rounded-sm px-4 py-3 mt-8 mb-2 text-[13px] text-boneDim leading-relaxed">
           <b className="text-rust">Unverified grouping:</b> wife assignments not yet confirmed on a
           person's profile page are placeholders. Click any box to expand or collapse that branch —
-          the chart opens three tiers deep (patriarch → wives → children) by default.
+          the chart opens three tiers deep by default.
         </div>
 
         {/* Organogram */}
@@ -232,6 +291,7 @@ export default function TreeView({
         <div className="flex gap-6 flex-wrap mt-2 pt-4 border-t border-panelLine text-[12.5px] text-boneDim">
           <span className="inline-flex items-center gap-1.5"><span className="text-rust">†</span> deceased</span>
           <span className="inline-flex items-center gap-1.5"><span className="text-gold">★</span> on your line</span>
+          <span className="inline-flex items-center gap-1.5"><span className="text-spouse">⚭</span> married in, not blood</span>
           <span>Click any box to expand or collapse its branch</span>
         </div>
 

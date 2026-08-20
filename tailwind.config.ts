@@ -14,6 +14,7 @@ const config: Config = {
         goldDim: "#8f7638",
         rust: "#b0562f",
         line: "#4d5b46",
+        spouse: "#7c98b3", // dusty blue — reserved for married-in people, distinct from gold (blood lineage) and rust (data-quality flags)
       },
       fontFamily: {
         display: ["'Fraunces'", "serif"],

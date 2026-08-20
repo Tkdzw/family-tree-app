@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { getPatriarchView } from "@/lib/tree";
 import TreeView from "@/components/TreeView";
 
@@ -23,14 +24,19 @@ export default async function Home({ searchParams }: { searchParams: { me?: stri
     );
   }
 
+  // read the spouse-visibility preference from a cookie so it's already
+  // correct on first paint (no flash of the wrong state) — defaults to
+  // shown for first-time visitors
+  const showSpousesCookie = cookies().get("showSpouses")?.value;
+  const initialShowSpouses = showSpousesCookie !== "0";
+
   return (
     <TreeView
       lineage={view.lineage}
       patriarch={view.patriarch}
-      wifeGroups={view.wifeGroups}
-      unassignedChildren={view.unassignedChildren}
       stats={view.stats}
       initialMeId={searchParams.me}
+      initialShowSpouses={initialShowSpouses}
     />
   );
 }
