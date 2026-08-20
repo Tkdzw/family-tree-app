@@ -313,6 +313,71 @@ any leftover placeholder wife-guess on those children and removes any other
 female parent already recorded for them first, so nobody ends up with two
 confirmed mothers.
 
+## Spouses are now generalized, visually distinct, and toggleable
+
+Previously the "spouse tier" on the org chart was hard-coded for the
+patriarch's 7 wives specifically. It's now a general rule: **any** person
+anywhere in the tree who has a recorded spouse (a real `Union` row) gets
+that same tier automatically — so if you add a wife or husband for someone
+several generations down, they'll show up on the chart exactly the same
+way, with no extra work. Children get attributed to whichever spouse is
+actually linked to them (`bulkLinkChildrenToSpouse`, `setChildMother`, or a
+direct link all count); anyone not yet linked to a specific spouse sits in
+an "Unassigned" bucket next to the spouse tier rather than disappearing.
+
+**Visual distinction:** married-in people now render in a dusty blue accent
+(`spouse` in `tailwind.config.ts`) with a dashed border and a ⚭ mark next to
+their name, instead of the gold used for blood descendants — so a chart
+with several marriages in it stays readable at a glance instead of every
+box looking the same.
+
+**Toggle, persisted as a cookie:** a switch next to the stats row
+("⚭ Spouses shown" / "Spouses hidden") hides the entire spouse tier when
+off — children reattach directly to their parent, same as anyone with no
+recorded spouse. The preference is written to a `showSpouses` cookie
+client-side and read server-side in `app/page.tsx` via `cookies()`, so it's
+already correct on first paint next time you load the page — no flash of
+the wrong state.
+
+## Relationship Finder now shows Shona terms too
+
+Every result shows the Shona kinship term right under the English one —
+`describeRelationshipShona()` in `lib/relationships.ts`. This isn't a
+translation of the English summary; it's a separate calculation, because
+Shona kinship depends on gender (of both people, and sometimes the
+connecting relative) in ways English "aunt/uncle/cousin" doesn't. Confirmed
+terms:
+
+| Relationship | Term |
+|---|---|
+| Parent / child | Baba or Amai / Mwana |
+| Grandparent / grandchild | Sekuru or Ambuya (Gogo) / Muzukuru |
+| Siblings, same sex | Mukoma (elder) / Munin'ina (younger) |
+| Siblings, opposite sex | Hanzvadzi |
+| Father's brother | Baba mukuru (older than your father) / Baba munini (younger) |
+| Father's sister | Tete |
+| Mother's brother | Sekuru |
+| Mother's sister | Amaiguru (older than your mother) / Amainini (younger) |
+| Parallel cousins (father's brother's kids, mother's sister's kids) | Same sibling terms as above |
+| Cross cousins (father's sister's kids, mother's brother's kids) | Sekuru (boy) / Mainini (girl) |
+
+**Two things extrapolated beyond what was explicitly confirmed** (flagged
+in code comments in `lib/relationships.ts`, worth a second look if this
+matters for accuracy): great-grandparent-and-beyond reuses the grandparent
+terms rather than a distinct word, and cousins past first-degree (second
+cousins, "N times removed") extend the same parallel/cross pattern rather
+than switching terms. Both were reasonable calls given the classificatory
+nature of the system, but neither was directly confirmed the way the terms
+in the table above were.
+
+**Missing data doesn't block a result** — gender defaults to male and birth
+order defaults to "first person is older" when unrecorded, per instruction
+to always produce a term rather than showing a "can't determine" message.
+Worth keeping in mind: a result involving someone without gender or birth
+order recorded may show a term that's a guess, not a confirmed fact —
+filling in that data makes the calculation actually correct rather than
+just decisive.
+
 ## Filling the gaps
 
 The seeded data has the same holes the spreadsheet has: no birth years, no

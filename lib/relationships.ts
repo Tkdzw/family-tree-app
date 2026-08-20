@@ -6,6 +6,8 @@ export type PersonRef = {
   name: string;
   surname: string | null;
   deceased: boolean;
+  gender: string | null;
+  birthOrder: number | null;
 };
 
 type Graph = {
@@ -94,7 +96,7 @@ async function loadGraph(): Promise<Graph> {
 
 function toRef(g: Graph, id: string): PersonRef {
   const p = g.byId.get(id)!;
-  return { id: p.id, name: p.name, surname: p.surname, deceased: p.deceased };
+  return { id: p.id, name: p.name, surname: p.surname, deceased: p.deceased, gender: p.gender, birthOrder: p.birthOrder };
 }
 
 export type SiblingEntry = PersonRef & { birthOrder: number | null; isSelf: boolean; position: number };
@@ -275,6 +277,116 @@ export function describeRelationship(aName: string, bName: string, genA: number,
   const cousinDegree = n - 1;
   const removedText = d > 0 ? `, ${d} time${d > 1 ? "s" : ""} removed` : "";
   return `${aName} and ${bName} are ${ordinalWord(cousinDegree)} cousins${removedText}.`;
+}
+
+// --- Shona relationship terms ---
+//
+// This is deliberately NOT a word-for-word translation of describeRelationship()
+// above — Shona kinship is a classificatory system where the correct term
+// depends on the GENDER of the people involved (and, for some terms, relative
+// birth order), not just generation-distance. Confirmed with the person who
+// requested this feature; two gaps were left as reasonable extrapolation
+// rather than blocking on missing confirmation:
+//   - great-grandparent+ reuses the grandparent terms (sekuru/ambuya/muzukuru)
+//     rather than a distinct word, since Shona doesn't clearly mark "great-"
+//     the way English does.
+//   - cousins beyond first-degree (second cousins, "N times removed") extend
+//     the same parallel/cross pattern given for first cousins, rather than
+//     switching to a different term at higher degrees.
+// Missing gender defaults to male; missing birth order defaults to treating
+// the first person as older — both so a term always comes out instead of
+// falling back to "can't determine," per the request.
+
+function shonaGender(ref?: PersonRef): "M" | "F" {
+  if (!ref) return "M";
+  return ref.gender === "F" ? "F" : "M";
+}
+
+function isOlder(a: PersonRef, b: PersonRef): boolean {
+  if (a.birthOrder == null || b.birthOrder == null) return true; // lower birthOrder = older
+  return a.birthOrder <= b.birthOrder;
+}
+
+export function describeRelationshipShona(result: ConnectionResult): string {
+  const { path, generationsFromAToAncestor: genA, generationsFromBToAncestor: genB } = result;
+  const A = path[0].person;
+  const B = path[path.length - 1].person;
+
+  if (genA === 0 && genB === 0) return `${A.name} na ${B.name} munhu mumwe chete.`;
+
+  const n = Math.min(genA, genB);
+  const d = Math.abs(genA - genB);
+  const peak = genA;
+
+  // direct lineage — one of them IS the shared ancestor
+  if (n === 0) {
+    const depth = Math.max(genA, genB);
+    const ancestorRef = genA === 0 ? A : B;
+    const descRef = genA === 0 ? B : A;
+    if (depth === 1) {
+      const parentWord = shonaGender(ancestorRef) === "F" ? "Amai" : "Baba";
+      return `${descRef.name} mwana wa${ancestorRef.name} — ${ancestorRef.name} ndi${parentWord} wa${descRef.name}.`;
+    }
+    const grandWord = shonaGender(ancestorRef) === "F" ? "Ambuya (Gogo)" : "Sekuru";
+    return `${descRef.name} muzukuru wa${ancestorRef.name} — ${ancestorRef.name} ndi${grandWord} wa${descRef.name}.`;
+  }
+
+  // siblings
+  if (n === 1 && d === 0) {
+    if (shonaGender(A) !== shonaGender(B)) {
+      return `${A.name} na ${B.name} Hanzvadzi.`;
+    }
+    const aOlder = isOlder(A, B);
+    const elderName = aOlder ? A.name : B.name;
+    const youngerName = aOlder ? B.name : A.name;
+    return `${elderName} Mukoma wa${youngerName} — ${youngerName} ndi Munin'ina wa${elderName}.`;
+  }
+
+  // parallel vs. cross: compare the genders of the common ancestor's two
+  // children — the ones the two lines actually diverge through. Same
+  // gender (two brothers, or two sisters) = parallel; different = cross.
+  // This one check drives both the aunt/uncle case and the cousin case.
+  const sideANode = path[peak - 1]?.person;
+  const sideBNode = path[peak + 1]?.person;
+  const isParallel = shonaGender(sideANode) === shonaGender(sideBNode);
+
+  // aunt/uncle <-> niece/nephew (n === 1, d >= 1)
+  if (n === 1) {
+    const elderIsA = genA === n;
+    const elderRef = elderIsA ? A : B;
+    const youngerRef = elderIsA ? B : A;
+    const connectingParent = elderIsA ? sideBNode : sideANode; // younger's actual parent, sibling of elder
+
+    let elderTerm: string;
+    if (isParallel) {
+      const elderOlder = connectingParent ? isOlder(elderRef, connectingParent) : true;
+      elderTerm =
+        shonaGender(elderRef) === "F"
+          ? elderOlder
+            ? "Amaiguru"
+            : "Amainini"
+          : elderOlder
+          ? "Baba mukuru"
+          : "Baba munini";
+    } else {
+      elderTerm = shonaGender(elderRef) === "F" ? "Tete" : "Sekuru";
+    }
+    return `${elderRef.name} ndi${elderTerm} wa${youngerRef.name} — ${youngerRef.name} muzukuru wa${elderRef.name}.`;
+  }
+
+  // cousins (n >= 2), including "removed" — same parallel/cross pattern
+  if (isParallel) {
+    if (shonaGender(A) !== shonaGender(B)) {
+      return `${A.name} na ${B.name} Hanzvadzi (hama dzepedyo).`;
+    }
+    const aOlder = isOlder(A, B);
+    const elderName = aOlder ? A.name : B.name;
+    const youngerName = aOlder ? B.name : A.name;
+    return `${elderName} Mukoma wa${youngerName} (hama dzepedyo) — ${youngerName} ndi Munin'ina wa${elderName}.`;
+  }
+  const aTerm = shonaGender(A) === "F" ? "Mainini" : "Sekuru";
+  const bTerm = shonaGender(B) === "F" ? "Mainini" : "Sekuru";
+  return `${A.name} ndi${aTerm} wa${B.name} — ${B.name} ndi${bTerm} wa${A.name}.`;
 }
 
 /**

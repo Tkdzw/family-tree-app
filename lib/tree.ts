@@ -16,6 +16,8 @@ export type TreeNode = {
   birthOrder: number | null;
   motherId: string | null; // effective mother: verified ParentChild link if one exists, else the unverified placeholder
   motherVerified: boolean; // true if motherId comes from a real ParentChild row, not just a placeholder guess
+  parentIds: string[]; // every recorded parent (not just the primary one) — used to attribute children to a specific spouse anywhere in the tree
+  spouses: { id: string; name: string }[]; // this person's own recorded marriages, at ANY level — not just the patriarch's
   children: TreeNode[];
 };
 
@@ -172,6 +174,19 @@ export async function getPatriarchView(): Promise<PatriarchView | null> {
     )
   );
 
+  // every person's own spouses, anywhere in the tree — not just the patriarch's.
+  // This is what lets the org chart show a married-in spouse tier at any level,
+  // automatically, as soon as a Union row exists for that person.
+  const spousesOf = new Map<string, string[]>();
+  for (const u of unions) {
+    if (u.partnerBId) {
+      if (!spousesOf.has(u.partnerAId)) spousesOf.set(u.partnerAId, []);
+      spousesOf.get(u.partnerAId)!.push(u.partnerBId);
+      if (!spousesOf.has(u.partnerBId)) spousesOf.set(u.partnerBId, []);
+      spousesOf.get(u.partnerBId)!.push(u.partnerAId);
+    }
+  }
+
   let maxDepth = 0;
   let verifiedMotherCount = 0;
 
@@ -200,6 +215,8 @@ export async function getPatriarchView(): Promise<PatriarchView | null> {
       birthOrder: p.birthOrder,
       motherId: verifiedMotherId ?? p.placeholderMotherId,
       motherVerified: !!verifiedMotherId,
+      parentIds: recordedParents,
+      spouses: (spousesOf.get(personId) ?? []).map((sid) => ({ id: sid, name: byId.get(sid)?.firstName ?? "Unknown" })),
       children: childIds.map((id) => build(id, depth + 1)),
     };
   }
