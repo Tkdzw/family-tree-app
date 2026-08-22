@@ -198,7 +198,7 @@ export async function getAllPeopleFlat(): Promise<FlatPerson[]> {
     const p = g.byId.get(id)!;
     const label = `${p.name}${p.surname ? " " + p.surname : ""}`;
     const breadcrumb = trail.join(" › ");
-    out.push({ id: p.id, name: p.name, surname: p.surname, deceased: p.deceased, breadcrumb });
+    out.push({ id: p.id, name: p.name, surname: p.surname, deceased: p.deceased, gender: p.gender, birthOrder: p.birthOrder, breadcrumb });
     for (const childId of g.childrenOf.get(id) ?? []) {
       walk(childId, [...trail, label]);
     }
