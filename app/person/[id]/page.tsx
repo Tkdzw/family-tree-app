@@ -5,6 +5,8 @@ import { getPatriarchView, getWives, getPatriarchId, findNodeInTree } from "@/li
 import { updatePersonDetails, setChildMother, clearVerifiedMother, addChild, addNewSpouse, reorderChild, bulkLinkChildrenToSpouse } from "@/app/actions";
 import RelativeLinker from "@/components/RelativeLinker";
 import { auth } from "@/auth";
+import SubmitButton from "@/components/SubmitButton";
+import Spinner from "@/components/Spinner";
 
 function NameLine({ p }: { p: { id: string; name: string; surname: string | null; deceased: boolean } }) {
   return (
@@ -100,7 +102,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
                     </p>
                     <form action={clearVerifiedMother}>
                       <input type="hidden" name="childId" value={person.id} />
-                      <button className="text-boneDim hover:text-rust text-xs font-mono underline">remove</button>
+                      <SubmitButton pendingText="Removing…" className="text-boneDim hover:text-rust text-xs font-mono underline">
+                        remove
+                      </SubmitButton>
                     </form>
                   </div>
                 ) : (
@@ -129,9 +133,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
                         <input type="checkbox" name="verify" className="accent-gold" />
                         Confirmed — lock this in
                       </label>
-                      <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                      <SubmitButton pendingText="Saving…" className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
                         Save
-                      </button>
+                      </SubmitButton>
                     </form>
                   </>
                 )}
@@ -160,9 +164,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
               </div>
               <EditTextarea label="Notes" name="notes" defaultValue={person.notes ?? ""} />
               <EditTextarea label="Source" name="sourceNote" defaultValue={person.sourceNote ?? ""} />
-              <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
+              <SubmitButton pendingText="Saving…" className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2 rounded-sm hover:bg-gold/20">
                 Save changes
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </details>
@@ -210,9 +214,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
                   <option value="M">M</option>
                   <option value="F">F</option>
                 </select>
-                <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                <SubmitButton pendingText="Adding…" className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
                   Add child
-                </button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -231,9 +235,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
                   <option value="M">M</option>
                   <option value="F">F</option>
                 </select>
-                <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                <SubmitButton pendingText="Adding…" className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
                   Add spouse
-                </button>
+                </SubmitButton>
               </form>
             </div>
 
@@ -271,9 +275,9 @@ export default async function PersonPage({ params }: { params: { id: string } })
                             </label>
                           ))}
                         </div>
-                        <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
+                        <SubmitButton pendingText={`Linking to ${spouse.name}…`} className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20">
                           Link selected to {spouse.name}
-                        </button>
+                        </SubmitButton>
                       </form>
                     ))}
                 </div>
@@ -386,25 +390,27 @@ function ReorderButtons({ parentId, childId, disableUp, disableDown }: { parentI
         <input type="hidden" name="parentId" value={parentId} />
         <input type="hidden" name="childId" value={childId} />
         <input type="hidden" name="direction" value="up" />
-        <button
+        <SubmitButton
           disabled={disableUp}
           title="Move up (older)"
+          pendingContent={<Spinner className="text-gold" />}
           className="w-5 h-5 inline-flex items-center justify-center text-boneDim hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed text-xs"
         >
           ▲
-        </button>
+        </SubmitButton>
       </form>
       <form action={reorderChild} className="inline">
         <input type="hidden" name="parentId" value={parentId} />
         <input type="hidden" name="childId" value={childId} />
         <input type="hidden" name="direction" value="down" />
-        <button
+        <SubmitButton
           disabled={disableDown}
           title="Move down (younger)"
+          pendingContent={<Spinner className="text-gold" />}
           className="w-5 h-5 inline-flex items-center justify-center text-boneDim hover:text-gold disabled:opacity-20 disabled:cursor-not-allowed text-xs"
         >
           ▼
-        </button>
+        </SubmitButton>
       </form>
     </span>
   );

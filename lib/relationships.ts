@@ -345,21 +345,49 @@ export function describeRelationshipShona(result: ConnectionResult): string {
   // parallel vs. cross: compare the genders of the common ancestor's two
   // children — the ones the two lines actually diverge through. Same
   // gender (two brothers, or two sisters) = parallel; different = cross.
-  // This one check drives both the aunt/uncle case and the cousin case.
+  // This one check drives both the aunt/uncle case and the direct-cousin case.
   const sideANode = path[peak - 1]?.person;
   const sideBNode = path[peak + 1]?.person;
   const isParallel = shonaGender(sideANode) === shonaGender(sideBNode);
 
-  // aunt/uncle <-> niece/nephew (n === 1, d >= 1)
-  if (n === 1) {
+  /**
+   * Aunt/uncle <-> niece/nephew, generalized to ANY "removed" distance, not
+   * just direct aunt/uncle (n === 1). The key realization: parallel cousins
+   * are classificatory siblings, and a sibling's child is a niece/nephew —
+   * so "first cousin once removed" on a parallel line isn't a cousin term
+   * at all, it's the SAME aunt/uncle shift, just applied one tier down.
+   * e.g. Ophillia and Morden Choviiwa are established as Hanzvadzi
+   * (siblings) via their parents being a same-gender pair; Morden is
+   * Tendai Asher's actual father, so Ophillia becomes Tendai's Tete —
+   * exactly the aunt/uncle formula, comparing Ophillia against Morden
+   * (her sibling-equivalent who is the real parent), not against Tendai
+   * directly.
+   *
+   * This only applies when the base relationship is parallel (n === 1 is
+   * always eligible — direct aunt/uncle is parallel-or-cross by
+   * definition — but n >= 2 only enters this shift when the cousin tier
+   * itself was parallel; a cross-cousin line just keeps extending
+   * Sekuru/Mainini at any remove instead, further down).
+   */
+  if (d >= 1 && (n === 1 || isParallel)) {
     const elderIsA = genA === n;
     const elderRef = elderIsA ? A : B;
     const youngerRef = elderIsA ? B : A;
-    const connectingParent = elderIsA ? sideBNode : sideANode; // younger's actual parent, sibling of elder
+    // the "peer" — younger's real ancestor at the same distance from the
+    // common ancestor as elder — is who elder's classificatory role is
+    // actually compared against. For n === 1 this is just younger's
+    // parent (elder's sibling); for n >= 2 it's however many steps down
+    // the line the elder's actual cousin-generation counterpart sits.
+    const peerIndex = elderIsA ? peak + n : peak - n;
+    const peerRef = path[peerIndex]?.person ?? (elderIsA ? sideBNode : sideANode);
 
     let elderTerm: string;
-    if (isParallel) {
-      const elderOlder = connectingParent ? isOlder(elderRef, connectingParent) : true;
+    let reciprocalTerm: string;
+    if (peerRef && shonaGender(elderRef) === shonaGender(peerRef)) {
+      // parallel: elder is treated as "another parent," so the reciprocal
+      // is Mwana (child), not muzukuru — muzukuru belongs to the cross
+      // (grandparent/uncle-style) relationship below, not this one.
+      const elderOlder = isOlder(elderRef, peerRef);
       elderTerm =
         shonaGender(elderRef) === "F"
           ? elderOlder
@@ -368,22 +396,33 @@ export function describeRelationshipShona(result: ConnectionResult): string {
           : elderOlder
           ? "Baba mukuru"
           : "Baba munini";
+      reciprocalTerm = "mwana";
     } else {
       elderTerm = shonaGender(elderRef) === "F" ? "Tete" : "Sekuru";
+      reciprocalTerm = "muzukuru";
     }
-    return `${elderRef.name} ndi${elderTerm} wa${youngerRef.name} — ${youngerRef.name} muzukuru wa${elderRef.name}.`;
+    return `${elderRef.name} ndi${elderTerm} wa${youngerRef.name} — ${youngerRef.name} ${reciprocalTerm} wa${elderRef.name}.`;
   }
 
-  // cousins (n >= 2), including "removed" — same parallel/cross pattern
-  if (isParallel) {
-    if (shonaGender(A) !== shonaGender(B)) {
-      return `${A.name} na ${B.name} Hanzvadzi (hama dzepedyo).`;
+  // direct cousins (n >= 2, d === 0) — parallel gets sibling terms, cross gets Sekuru/Mainini
+  if (n >= 2 && d === 0) {
+    if (isParallel) {
+      if (shonaGender(A) !== shonaGender(B)) {
+        return `${A.name} na ${B.name} Hanzvadzi (hama dzepedyo).`;
+      }
+      const aOlder = isOlder(A, B);
+      const elderName = aOlder ? A.name : B.name;
+      const youngerName = aOlder ? B.name : A.name;
+      return `${elderName} Mukoma wa${youngerName} (hama dzepedyo) — ${youngerName} ndi Munin'ina wa${elderName}.`;
     }
-    const aOlder = isOlder(A, B);
-    const elderName = aOlder ? A.name : B.name;
-    const youngerName = aOlder ? B.name : A.name;
-    return `${elderName} Mukoma wa${youngerName} (hama dzepedyo) — ${youngerName} ndi Munin'ina wa${elderName}.`;
+    const aTerm = shonaGender(A) === "F" ? "Mainini" : "Sekuru";
+    const bTerm = shonaGender(B) === "F" ? "Mainini" : "Sekuru";
+    return `${A.name} ndi${aTerm} wa${B.name} — ${B.name} ndi${bTerm} wa${A.name}.`;
   }
+
+  // remaining case: n >= 2, d >= 1, cross line (not parallel) — Sekuru/Mainini
+  // terms are already known to extend loosely across generations in real
+  // usage, so this stays unshifted rather than inventing a new term.
   const aTerm = shonaGender(A) === "F" ? "Mainini" : "Sekuru";
   const bTerm = shonaGender(B) === "F" ? "Mainini" : "Sekuru";
   return `${A.name} ndi${aTerm} wa${B.name} — ${B.name} ndi${bTerm} wa${A.name}.`;

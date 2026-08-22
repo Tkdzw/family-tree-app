@@ -361,6 +361,33 @@ terms:
 | Parallel cousins (father's brother's kids, mother's sister's kids) | Same sibling terms as above |
 | Cross cousins (father's sister's kids, mother's brother's kids) | Sekuru (boy) / Mainini (girl) |
 
+### Bug fix: "removed" cousins on a parallel line
+
+The first version reapplied the direct-cousin formula regardless of how
+many generations removed, which gave nonsense for cases like Ophillia and
+Tendai Asher (first cousins once removed). Fixed by recognizing that once
+two people are established as classificatory siblings (a parallel cousin
+pair), a sibling's *child* is a niece/nephew, not still a "cousin" — the
+same aunt/uncle shift now applies at any removal distance on a parallel
+line, not just directly. Verified against the exact case that surfaced
+this: Ophillia and Morden Choviiwa are Hanzvadzi (siblings, via their
+parents being a same-gender pair); Morden is Tendai Asher's actual father;
+so Ophillia is correctly Tendai's **Tete**. Cross-line "removed" cousins
+(through a father's-sister or mother's-brother connection) still use
+Sekuru/Mainini regardless of removal distance, since those terms are
+already known to extend loosely across generations in practice rather than
+shifting the way parallel lines do.
+
+### Bug fix: reciprocal term for Baba mukuru/munini and Amaiguru/Amainini
+
+These were reciprocating with "muzukuru" (nephew/grandchild) regardless of
+which term applied — but that reciprocal only belongs with the true cross
+terms (Tete/Sekuru). Since Baba mukuru/munini and Amaiguru/Amainini treat
+the elder as "another parent," the correct reciprocal is **mwana** (child):
+the elder-generation person is Baba mukuru to the child, and the child is
+that person's mwana, not muzukuru. Fixed in the same block in
+`lib/relationships.ts`, verified against both branches directly.
+
 **Two things extrapolated beyond what was explicitly confirmed** (flagged
 in code comments in `lib/relationships.ts`, worth a second look if this
 matters for accuracy): great-grandparent-and-beyond reuses the grandparent
@@ -377,6 +404,34 @@ Worth keeping in mind: a result involving someone without gender or birth
 order recorded may show a term that's a guess, not a confirmed fact —
 filling in that data makes the calculation actually correct rather than
 just decisive.
+
+## Loading states on every submit
+
+Every button that submits a server action now shows real feedback while
+it's working, instead of appearing to do nothing until the page updates.
+
+- **`components/SubmitButton.tsx`** — a drop-in replacement for a raw
+  `<button>` inside any `<form action={...}>`. Built on React's
+  `useFormStatus()`, so it automatically knows when its form is submitting
+  — no manual state wiring needed per form. Text buttons swap to a spinner
+  + "Saving…" / "Adding…" / etc.; compact icon-only buttons (the ▲▼
+  reorder controls) swap to just a small spinner since there's no room for
+  text. The button also disables itself while pending, so a slow save
+  can't be double-submitted by an impatient click.
+- **`components/Spinner.tsx`** — the small spinner these use, styled to
+  match the palette (`currentColor`, so it inherits gold/rust/etc.
+  automatically from whatever button it's in).
+- Applied everywhere a server action is submitted: every edit/add/link/
+  reorder form on a profile page, the backup import (given the most
+  explicit pending text of all — "Restoring — this replaces everything,
+  please wait…" — since that one genuinely takes a moment and getting
+  impatient with it would be the worst place to double-click), login,
+  register, and sign-out.
+
+The Relationship Finder's "Find Connection" button already had its own
+loading state from earlier (it's a client-side fetch, not a form action,
+so it uses local `loading` state instead) — left as-is, no need to convert
+it to this pattern.
 
 ## Filling the gaps
 

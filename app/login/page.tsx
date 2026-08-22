@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { loginUser } from "@/app/auth-actions";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function LoginPage({
   searchParams,
@@ -49,9 +50,9 @@ export default function LoginPage({
             className="w-full bg-panel border border-panelLine text-bone text-sm rounded-sm px-3.5 py-2.5 outline-none focus:border-goldDim"
           />
         </label>
-        <button className="w-full bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20">
+        <SubmitButton pendingText="Signing in…" className="w-full bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20">
           Sign in
-        </button>
+        </SubmitButton>
       </form>
 
       <p className="text-boneDim text-sm mt-6">

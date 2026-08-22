@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { auth } from "@/auth";
 import { logoutUser } from "@/app/auth-actions";
+import SubmitButton from "@/components/SubmitButton";
 
 export const metadata: Metadata = {
   title: "Nyikadzino's Lineage — Chiwashira & Ziwenga Family Tree",
@@ -41,9 +42,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     ✓ {session.user.name}
                   </span>
                   <form action={logoutUser}>
-                    <button className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
+                    <SubmitButton pendingText="Signing out…" className="font-mono text-[11px] uppercase tracking-wide text-boneDim hover:text-gold">
                       Sign out
-                    </button>
+                    </SubmitButton>
                   </form>
                 </>
               ) : (

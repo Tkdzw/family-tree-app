@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { linkExistingRelative } from "@/app/actions";
 import type { FlatPerson } from "@/lib/relationships";
+import SubmitButton from "./SubmitButton";
 
 export default function RelativeLinker({ personId, allPeople }: { personId: string; allPeople: FlatPerson[] }) {
   const [query, setQuery] = useState("");
@@ -74,12 +75,13 @@ export default function RelativeLinker({ personId, allPeople }: { personId: stri
         )}
       </div>
 
-      <button
+      <SubmitButton
         disabled={!otherId}
+        pendingText="Linking…"
         className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-3.5 py-2 rounded-sm hover:bg-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Link
-      </button>
+      </SubmitButton>
     </form>
   );
 }
