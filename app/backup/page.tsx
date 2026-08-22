@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { importBackup } from "@/app/actions";
 import { auth } from "@/auth";
+import SubmitButton from "@/components/SubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -84,9 +85,12 @@ export default async function BackupPage({
                 <input type="checkbox" required className="accent-gold mt-0.5" />
                 I understand this replaces all current data and can't be undone from within the app.
               </label>
-              <button className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20">
+              <SubmitButton
+                pendingText="Restoring — this replaces everything, please wait…"
+                className="bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20"
+              >
                 Restore from backup
-              </button>
+              </SubmitButton>
             </form>
           </>
         ) : (

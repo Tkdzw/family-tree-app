@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { registerUser } from "@/app/auth-actions";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function RegisterPage({ searchParams }: { searchParams: { error?: string } }) {
   return (
@@ -58,9 +59,9 @@ export default function RegisterPage({ searchParams }: { searchParams: { error?:
             className="w-full bg-panel border border-panelLine text-bone text-sm rounded-sm px-3.5 py-2.5 outline-none focus:border-goldDim"
           />
         </label>
-        <button className="w-full bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20">
+        <SubmitButton pendingText="Creating account…" className="w-full bg-gold/10 border border-goldDim text-gold text-sm font-medium px-4 py-2.5 rounded-sm hover:bg-gold/20">
           Create account
-        </button>
+        </SubmitButton>
       </form>
 
       <p className="text-boneDim text-sm mt-6">

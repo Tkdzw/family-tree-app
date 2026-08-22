@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { FlatPerson, PersonRef, ConnectionResult } from "@/lib/relationships";
-import { describeRelationship } from "@/lib/relationships";
+import { describeRelationship, describeRelationshipShona } from "@/lib/relationships";
 import OrgChart, { type OrgNode } from "./OrgChart";
 
 function PersonPicker({
@@ -179,7 +179,7 @@ export default function ConnectionsFinder({ people, initialA }: { people: FlatPe
       {result && (
         <div className="mt-8 bg-panel border border-panelLine rounded-sm p-5">
           {result.path.length > 1 ? (
-            <div className="mb-5 pb-5 border-b border-panelLine">
+            <div className="mb-5 pb-5 border-b border-panelLine space-y-1.5">
               <p className="text-lg text-bone leading-snug">
                 {describeRelationship(
                   result.path[0].person.name,
@@ -188,6 +188,7 @@ export default function ConnectionsFinder({ people, initialA }: { people: FlatPe
                   result.generationsFromBToAncestor
                 )}
               </p>
+              <p className="text-lg text-gold leading-snug">{describeRelationshipShona(result)}</p>
               {result.commonAncestor && (
                 <p className="text-boneDim text-sm mt-2">
                   Connected through <b className="text-gold">{result.commonAncestor.name}</b>
